@@ -13,7 +13,7 @@
 ;; 1. A numbered filename specification which serves as unique id.
 
 ;; 2. Placing that same id into the file header, so that concatenated files
-;; have reference back to their source.
+;; have reference back to their source. See the `mdcat' utility.
 
 ;; 3. Using a source "journal/" directory, where source files should first be
 ;; composed and where we can assume a file exists if not elsewhere.
@@ -49,7 +49,7 @@
   )
 
 (defun uldb-journal-header ()
-  "Create a uldb-journal header composed of:
+  "Create a uldb-journal-header composed of:
 # buffer-name minus the .md file type
 : date
 "
@@ -91,6 +91,8 @@
 ;; find-file C-x C-f solution
 ;; combined with the hook into `file-name-at-point-functions', this means I can
 ;; run find-file at point, followed by M-n :
+
+;; TODO: reuse same fallback logic as the embark advice if I keep this.
 (defun uldb-journal-find-file ()
   (let ((default-directory uldb-journal-path)
         (thing (thing-at-point 'filename))
