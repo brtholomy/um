@@ -27,15 +27,13 @@
 ;; 4. Using the built-in `project' package to organize compositions built from
 ;; these source files.
 
-;; 5. (Optional) Use `embark' to visit files with a single keystroke.
-
 ;; features provided:
 ;; `um-journal-header' defines the standard header
 
 ;; `um-project-find-meta' via `project-switch-project': open a file like
 ;; *meta.md in a given project.
 
-;; `um-file-at-point-advice' via `embark-dwim': open file in known projects
+;; (Optional) `um-file-at-point-advice' via `embark-dwim': open file in known projects
 ;; with fallback to journal/
 
 ;; `um-grep-tag': search files with same tag

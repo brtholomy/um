@@ -111,4 +111,4 @@ print finalstr
 }'
 `
 
-emacsclient --eval "(progn (find-file \"$NEXTFILE\") (journal) (message \"creating $NEXTFILE\"))"
+emacsclient --eval "(progn (find-file \"$NEXTFILE\") (uldb-journal-header) (message \"creating $NEXTFILE\"))"
