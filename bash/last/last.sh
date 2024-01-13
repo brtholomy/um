@@ -6,4 +6,4 @@
 # in plain terms:
 #   [leading numbers with consistent width].[optional string descriptor and . separator][md|txt]
 
-ls | egrep '^\d.*\.md|txt' | tail -n 1
+ls | egrep '^[[:digit:]].*\.md|txt' | tail -n 1
