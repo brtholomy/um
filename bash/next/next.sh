@@ -64,8 +64,6 @@
 # may in certain situations conflict with the alias. The link should be "next.sh" -> ~/config/..
 # 4. NOTE: I use 'e' rather than 'emacs', to use my clever emacs/emacsclient function.
 
-e `
-
 ls | egrep '^[[:digit:]].*\.md|txt' | tail -n 1 | awk '
 
 BEGIN {
@@ -110,4 +108,3 @@ finalstr = sprintf("%s.%s", finalstr, $NF)
 END {
 print finalstr
 }'
-`

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# catch first arguments with $1
+case "$1" in
+    next)
+        ~/dev/uldb/bash/next/next.sh $2
+        ;;
+    *)
+        # else
+        echo "usage: um (next|last|cat|rename)"
+        ;;
+esac
