@@ -1,20 +1,22 @@
 #!/bin/bash
 
+# export so that we can use it in subscripts.
+export UMBASEPATH=`realpath $0 | xargs dirname`
+
 # catch first arguments with $1
 case "$1" in
     next)
-        NEXTFILE=`./bash/next/next.sh $2`
-        emacsclient --eval "(progn (find-file \"$NEXTFILE\") (journal))"
+        $UMBASEPATH/bash/next/next.sh $2
         ;;
     last)
-        ./bash/last/last.sh
+        $UMBASEPATH/bash/last/last.sh
         ;;
     cat)
         # all args but first
-        ./bash/mdcat/mdcat.sh "${@:2}"
+        $UMBASEPATH/bash/mdcat/mdcat.sh "${@:2}"
         ;;
     rename)
-        ./bash/rename/rename.sh "${@:2}"
+        $UMBASEPATH/bash/rename/rename.sh "${@:2}"
         ;;
     *)
         # else

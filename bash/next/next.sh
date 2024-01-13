@@ -64,7 +64,8 @@
 # may in certain situations conflict with the alias. The link should be "next.sh" -> ~/config/..
 # 4. NOTE: I use 'e' rather than 'emacs', to use my clever emacs/emacsclient function.
 
-ls | egrep '^[[:digit:]].*\.md|txt' | tail -n 1 | awk '
+
+NEXTFILE=`$UMBASEPATH/bash/last/last.sh | awk '
 
 BEGIN {
 # set field separator, blank by default
@@ -108,3 +109,6 @@ finalstr = sprintf("%s.%s", finalstr, $NF)
 END {
 print finalstr
 }'
+`
+
+emacsclient --eval "(progn (find-file \"$NEXTFILE\") (journal) (message \"creating $NEXTFILE\"))"
