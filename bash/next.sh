@@ -65,7 +65,7 @@
 # 4. NOTE: I use 'e' rather than 'emacs', to use my clever emacs/emacsclient function.
 
 
-NEXTFILE=`$UMBASEPATH/bash/last/last.sh | awk '
+NEXTFILE=`$UMBASEPATH/last.sh | awk '
 
 BEGIN {
 # set field separator, blank by default

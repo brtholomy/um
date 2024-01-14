@@ -6,17 +6,17 @@ export UMBASEPATH=`realpath $0 | xargs dirname`
 # catch first arguments with $1
 case "$1" in
     next)
-        $UMBASEPATH/bash/next/next.sh $2
+        $UMBASEPATH/next.sh $2
         ;;
     last)
-        $UMBASEPATH/bash/last/last.sh
+        $UMBASEPATH/last.sh
         ;;
     cat)
         # all args but first
-        $UMBASEPATH/bash/mdcat/mdcat.sh "${@:2}"
+        $UMBASEPATH/cat.sh "${@:2}"
         ;;
     rename)
-        $UMBASEPATH/bash/rename/rename.sh "${@:2}"
+        $UMBASEPATH/rename.sh "${@:2}"
         ;;
     *)
         # else
