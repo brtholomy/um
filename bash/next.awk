@@ -1,15 +1,18 @@
 # awk script to increment the digits, preserve the zero prefix, add string descriptor if supplied, and add back extension
 
 BEGIN {
-# set field separator, blank by default
+# Builtin variable, "field seperator", blank by default. The neatness of this is
+# the main reason I use awk to parse the filename.
 FS = "."
 }
 
 {
+
+# another reason why awk is great for this:
 newnum = $1 + 1
-nzeros = length($1) - length(int(newnum))
 
 # could I do this with a simpler regex to select all leading zeros?
+nzeros = length($1) - length(int(newnum))
 leadingzeros = ""
 if (nzeros > 0)
   for (i = 1; i <= nzeros; i++)
