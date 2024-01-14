@@ -64,7 +64,15 @@ Note the optional setup of `embark`, which allows us to visit files just by invo
 
 # CLI usage
 
-To get started, just create an empty directory to serve as content origin. It doesn't matter where or what it's called, since the shell scripts only assume a sequentially numbered collection of files.
+1. To get started, create an empty directory to serve as content origin. It doesn't matter where or what it's called, since the shell scripts only assume a sequentially numbered collection of files.
+
+2. Decide on a zero-width for your series and seed the first file:
+
+  ```
+  touch 001.md
+  ```
+
+  The rest of the commands will now work with this width.
 
 ## next
 
