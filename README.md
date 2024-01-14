@@ -4,6 +4,8 @@ An (U)ltralight database for (M)arkdown composition.
 
 `um` is an ultralight database design and emacs toolkit for organizing writing into larger compositions. It uses only unique filenames, POSIX filesystem conventions, the builtin emacs `project` package, and standard POSIX commandline tools to build out the CLI.
 
+It tries to be stupid-simple. Because the "CLI" is just sh and awk, it really only has emacs as a dependency.
+
 It consists of two parts:
 
 1. Elisp for functionality within emacs. Most of it is integrated directly with the `project` interface, and consists the ability to find a file from a filename.
