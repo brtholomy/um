@@ -18,8 +18,10 @@ case "$1" in
     rename)
         $UMBASEPATH/rename.sh "${@:2}"
         ;;
+    tag)
+        $UMBASEPATH/tag.sh "${@:2}"
+        ;;
     *)
-        # else
-        echo "usage: um (next|last|cat|rename)"
+        echo "usage: um (next|last|cat|rename|tag)"
         ;;
 esac
