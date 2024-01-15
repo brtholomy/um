@@ -54,9 +54,9 @@ My config looks like this:
   :after (project embark)
 
   :config
-  (defalias 'journal 'uldb-journal-header)
+  (defalias 'journal 'um-journal-header)
 
-  (advice-add 'embark-target-file-at-point :around 'uldb-file-at-point-advice)
+  (advice-add 'embark-target-file-at-point :around 'um-file-at-point-advice)
 
   :load-path "~/um/elisp"
 )

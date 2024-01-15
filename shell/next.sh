@@ -20,4 +20,4 @@ NEXTFILE=`$UMBASEPATH/last.sh | awk -f $UMBASEPATH/next.awk -v arg=$1`
 
 # HACK: emacs won't accept piped input as a file name, so we use --eval to open
 # the file via find-file.
-emacsclient --eval "(progn (find-file \"$NEXTFILE\") (uldb-journal-header) (message \"creating $NEXTFILE\"))"
+emacsclient --eval "(progn (find-file \"$NEXTFILE\") (um-journal-header) (message \"creating $NEXTFILE\"))"
