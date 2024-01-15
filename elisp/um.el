@@ -52,6 +52,7 @@
   (format-time-string "%Y.%m.%d")
   )
 
+;;;###autoload
 (defun um-journal-header ()
   "Create a um-journal-header composed of:
 # buffer-name minus the .md file type
@@ -97,6 +98,7 @@
 ;; run find-file at point, followed by M-n :
 
 ;; TODO: reuse same fallback logic as the embark advice if I keep this.
+;;;###autoload
 (defun um-journal-find-file ()
   (let ((default-directory um-journal-path)
         (thing (thing-at-point 'filename))
@@ -118,6 +120,7 @@
 ;; `embark-target-finders', since I'd have to remove the file finder and put my
 ;; function in the same place in the list anyway.
 
+;;;###autoload
 (defun um-file-at-point-advice (origfunc)
   "Like find-file-at-point, but checks all known project paths.
 
@@ -159,6 +162,7 @@ in the root dir.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; C-x p p
 
+;;;###autoload
 (defun um-project-find-meta ()
   (interactive)
   ;; this works because `project-switch-project' overrides the dir:
