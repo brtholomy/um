@@ -29,7 +29,6 @@
 
 ;; features provided:
 ;; `um-journal-header' defines the standard header
-
 ;; `um-project-find-meta' via `project-switch-project': open a file like
 ;; *meta.md in a given project.
 
@@ -54,13 +53,15 @@
 
 ;;;###autoload
 (defun um-journal-header ()
-  "Create a um-journal-header composed of:
-# buffer-name minus the .md file type
+  "Create a header composed of:
+
+# filename
 : date
+
 "
    (interactive)
    (insert
-    (format "# %s\n: %s\n\n" (substring (buffer-name) 0 -3) (um-iso-8601))
+    (format "# %s\n: %s\n\n" (buffer-name) (um-iso-8601))
     )
    )
 

@@ -23,6 +23,8 @@ This "database" depends on a few simple ideas:
     ```markdown
     # 001.foo.md
     : 2024.01.14
+    - place_optional
+    + tag_optional
     ```
 
     See the `um cat` command for why this matters.
@@ -66,6 +68,8 @@ Note the optional setup of `embark`, which allows us to visit files just by invo
 
 # CLI usage
 
+The "command line interface" is just a small set of convenient scripts: since these are just text files, we could just as easily create everything manually.
+
 1. To get started, create an empty directory to serve as content origin. It doesn't matter where or what it's called, since the shell scripts only assume a sequentially numbered collection of files.
 
 2. Decide on a zero-width for your series and seed the first file:
@@ -78,7 +82,7 @@ Note the optional setup of `embark`, which allows us to visit files just by invo
 
 ## next
 
-Create a new file - and open it with emacsclient by default:
+Create a new file, open it with emacsclient, and run `um-journal-header`:
 
 ```
 um next
@@ -104,17 +108,17 @@ One of the advantages of the header specification, is that it allows us to `cat`
 
 So rather than overengineer, like most engineers do, I choose to stick with plaintext files everywhere, and let the source file serve as history relative to the larger project. It means that the source of truth for my writing projects travels downstream, which is not ideal but largely fine - since git makes history of everything anyway.
 
-All this stupid little command does, is cat files together while placing a Markdown horizontal rule between them, like this:
+All this stupid little command does, is concatenate files together while placing a Markdown horizontal rule between them, like this:
 
 ```sh
 um cat 01.md 02.md
 
-# 01
+# 01.md
 : 2024.01.14
 
 ---
 
-# 02
+# 02.md
 : 2024.01.14
 ```
 
@@ -139,13 +143,13 @@ And we get `02.foo.md`.
 The file header allows for an optional block of tags, marked by a `+` like this:
 
 ```markdown
-# 02
+# 02.md
 : 2024.01.14
 + foo
 + bar
 ```
 
-We can then grep for these tags. This command just makes it easier:
+We can then grep for these tags. This command just makes it easier to list them:
 
 ```sh
 um tag foo
