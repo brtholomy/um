@@ -28,12 +28,13 @@ NEXTFILE=`$UMBASEPATH/last.sh | awk -f $UMBASEPATH/next.awk -v arg=$1`
 
 # tag is optional second arg to this script
 TAGINSERT='(previous-line) (insert "+ %s\\n") (next-line)'
-
-# + means insert the string descriptor as tag
-if [ $2 = '+' ]; then
-    UMTAG=$(printf "$TAGINSERT" "$1")
-elif [ $2 ]; then
-    UMTAG=$(printf "$TAGINSERT" "$2")
+if [ $2 ]; then
+    # + means insert the string descriptor as tag
+    if [ $2 = '+' ]; then
+        UMTAG=$(printf "$TAGINSERT" "$1")
+    else
+        UMTAG=$(printf "$TAGINSERT" "$2")
+    fi
 fi
 
 # HACK: emacs won't accept piped input as a file name, so we use --eval to open
