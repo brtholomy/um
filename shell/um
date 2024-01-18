@@ -16,10 +16,10 @@ case "$1" in
         $UMBASEPATH/cat.sh "${@:2}"
         ;;
     rename)
-        $UMBASEPATH/rename.sh "${@:2}"
+        $UMBASEPATH/rename.sh $2 $3
         ;;
     tag)
-        $UMBASEPATH/tag.sh "${@:2}"
+        $UMBASEPATH/tag.sh $2
         ;;
     *)
         echo "usage: um (next|last|cat|rename|tag)"
