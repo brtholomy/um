@@ -6,7 +6,7 @@ export UMBASEPATH=`realpath $0 | xargs dirname`
 # catch first arguments with $1
 case "$1" in
     next)
-        $UMBASEPATH/next.sh $2
+        $UMBASEPATH/next.sh $2 $3
         ;;
     last)
         $UMBASEPATH/last.sh

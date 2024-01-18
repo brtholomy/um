@@ -16,7 +16,17 @@ Conceptually, `um` is somewhat like org-roam, except without any database depend
 
 This "database" depends on a few simple ideas:
 
-1. A sequentially numbered filename specification which serves as unique id, like this: `001.foo.md`.  The filesystem is the database. Note that the string descriptor is optional.
+1. A sequentially numbered filename specification which serves as unique id, like this: `001.foo.md`.  The filesystem is the database. Note that the string descriptor is optional. In regex terms:
+
+    ```sh
+    ls | egrep '^[[:digit:]]+\.?.*\.md|txt'
+    ```
+
+    In pseudocode:
+
+    ```
+    [leadings numbers].[optional string descriptor and . separator][md|txt]
+    ```
 
 2. Placing that same id into the file header, so that concatenated files have reference back to their source - like this:
 
@@ -37,13 +47,13 @@ This "database" depends on a few simple ideas:
 
 Clone it:
 
-```
+```sh
 git clone https://github.com/brtholomy/um.git ~/um
 ```
 
 Symlink the `um` CLI somewhere in your `PATH`:
 
-```
+```sh
 ln -s ~/um/shell/um /usr/local/bin/um
 ```
 
@@ -74,8 +84,8 @@ The "command line interface" is just a small set of convenient scripts: since th
 
 2. Decide on a zero-width for your series and seed the first file:
 
-  ```
-  touch 001.md
+  ```sh
+  touch 01.md
   ```
 
   The rest of the commands will now work with this width.
@@ -84,21 +94,63 @@ The "command line interface" is just a small set of convenient scripts: since th
 
 Create a new file, open it with emacsclient, and run `um-journal-header`:
 
-```
+```sh
 um next
+```
+
+Yields:
+
+```markdown
+# 02.md
+: 2024.01.14
 ```
 
 Create a new file with an optional descriptor:
 
-```
+```sh
 um next foo
+```
+
+Yields:
+
+```markdown
+# 03.foo.md
+: 2024.01.14
+```
+
+Create a new file with an optional descriptor and tag:
+
+```sh
+um next foo bar
+```
+
+Yields:
+
+```markdown
+# 04.foo.md
+: 2024.01.14
++ bar
+```
+
+Or just append `+` to add the descriptor as a tag:
+
+```sh
+um next foo +
+```
+
+Yields:
+
+```markdown
+# 05.foo.md
+: 2024.01.14
++ foo
 ```
 
 ## last
 
 `um last` will print the name of the last numbered file. This can be useful on its own, or like this:
 
-```
+```sh
 um last | xargs emacs
 ```
 

@@ -1,23 +1,41 @@
-# Get the file name in any numbered series of text files and open with emacs
+#!/bin/bash
+
+# Generate the next filename in any numbered series of text files and open with emacs.
 
 # Usage:
-#     $ next [descriptor]
+#     $ next [descriptor] [tag]
 
-# Handles an optional string descriptor. Like this:
+# Handles optional string descriptor and tag. Like this:
 #    $ ls
 #    011.blah.md
+#
 #    $ next foo
 #    012.foo.md
-
-# File format:
-# in regex terms:
-#   [0-9]+\.[.*\.]*md|txt
-# in plain terms:
-#   [leadings numbers with consistent width].[optional string descriptor and . separator][md|txt]
+#
+#    $ next foo bar
+#    013.foo.md
+#
+# Which populates the file like this:
+#
+# # 13.foo.md
+# : 2024.01.14
+# + bar
+#
+# See https://github.com/brtholomy/um#next
 
 # NOTE the optional $1 arg passed to awk with -v:
 NEXTFILE=`$UMBASEPATH/last.sh | awk -f $UMBASEPATH/next.awk -v arg=$1`
 
+# tag is optional second arg to this script
+TAGINSERT='(previous-line) (insert "+ %s\\n") (next-line)'
+
+# + means insert the string descriptor as tag
+if [ $2 = '+' ]; then
+    UMTAG=$(printf "$TAGINSERT" "$1")
+elif [ $2 ]; then
+    UMTAG=$(printf "$TAGINSERT" "$2")
+fi
+
 # HACK: emacs won't accept piped input as a file name, so we use --eval to open
 # the file via find-file.
-emacsclient --eval "(progn (find-file \"$NEXTFILE\") (um-journal-header) (message \"creating $NEXTFILE\"))"
+emacsclient --eval "(progn (find-file \"$NEXTFILE\") (um-journal-header) $UMTAG (message \"creating $NEXTFILE\"))"
