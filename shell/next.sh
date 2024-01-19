@@ -37,6 +37,13 @@ if [ $2 ]; then
     fi
 fi
 
-# HACK: emacs won't accept piped input as a file name, so we use --eval to open
-# the file via find-file.
-emacsclient --eval "(progn (find-file \"$NEXTFILE\") (um-journal-header) $UMTAG (message \"creating $NEXTFILE\"))"
+UMELISP="(progn (find-file \"$NEXTFILE\") (um-journal-header) $UMTAG (message \"creating $NEXTFILE\"))"
+
+# for testing and piping
+if [ $UMNEXTECHO = true ]; then
+    echo $NEXTFILE $UMTAG
+else
+    # HACK: emacs won't accept piped input as a file name, so we use --eval to open
+    # the file via find-file.
+    emacsclient --eval "$UMELISP"
+fi
