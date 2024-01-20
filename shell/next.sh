@@ -41,7 +41,7 @@ UMELISP="(progn (find-file \"$NEXTFILE\") (um-journal-header) $UMTAG (message \"
 
 # for testing and piping
 if [ $UMNEXTECHO = true ]; then
-    echo $NEXTFILE $UMTAG
+    echo $UMELISP
 else
     # HACK: emacs won't accept piped input as a file name, so we use --eval to open
     # the file via find-file.

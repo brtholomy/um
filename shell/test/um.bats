@@ -7,7 +7,8 @@ setup() {
     # as those will point to the bats executable's location or the preprocessed file respectively
     DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
     # make executables visible to PATH
-    PATH="$DIR/..:$PATH"
+    # FIXME: why isn't this working?
+    # PATH="$DIR/../:$PATH"
     # commands depend on being in the journal/ path.
     cd $DIR/mockjournal
     # so that we can run next.sh without dealing with emacsclient.
@@ -24,22 +25,39 @@ teardown() {
     assert_output 'usage: um (next|last|cat|rename|tag)'
 }
 
-@test "next empty" {
+um_next_awk() {
+    echo "$1" | awk -f $DIR/../next.awk -v arg="$2"
+}
+
+@test "next.awk" {
+    run um_next_awk 01.md
+    assert_output '02.md'
+
+    run um_next_awk 01.md foo
+    assert_output '02.foo.md'
+}
+
+@test "um next empty" {
     run um next
-    assert_output '100.md'
+    assert_output --partial '100.md'
 }
 
-@test "next descriptor" {
+@test "um next empty elisp" {
+    run um next
+    assert_output '(progn (find-file "100.md") (um-journal-header) (message "creating 100.md"))'
+}
+
+@test "um next descriptor" {
     run um next foo
-    assert_output '100.foo.md'
+    assert_output --partial '100.foo.md'
 }
 
-@test "next descriptor tag" {
+@test "um next descriptor tag" {
     run um next foo bar
     assert_output --partial '(insert "+ bar\n")'
 }
 
-@test "next descriptor +" {
+@test "um next descriptor +" {
     run um next foo +
     assert_output --partial '(insert "+ foo\n")'
 }
@@ -64,7 +82,7 @@ teardown() {
 
 um_rename_awk() {
     echo "$1
-$2" | awk -f ../../rename.awk
+$2" | awk -f $DIR/../rename.awk
 }
 
 @test "rename.awk" {
