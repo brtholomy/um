@@ -23,8 +23,11 @@
 #
 # See https://github.com/brtholomy/um#next
 
-# NOTE the optional $1 arg passed to awk with -v:
-NEXTFILE=`$UMBASEPATH/last.sh | awk -f $UMBASEPATH/next.awk -v arg=$1`
+# NOTE: handle the exit 1 case of last.sh
+LASTFILE=`$UMBASEPATH/last.sh || echo $UMDEFAULTINIT`
+
+# NOTE: the optional $1 arg passed to awk with -v:
+NEXTFILE=`echo $LASTFILE | awk -f $UMBASEPATH/next.awk -v arg=$1`
 
 # tag is optional second arg to this script
 TAGINSERT='(previous-line) (insert "+ %s\\n") (next-line)'
@@ -40,10 +43,12 @@ fi
 UMELISP="(progn (find-file \"$NEXTFILE\") (um-journal-header) $UMTAG (message \"creating $NEXTFILE\"))"
 
 # for testing and piping
-if [ $UMNEXTECHO = true ]; then
+if [ $UMNEXTECHO ]; then
     echo $UMELISP
 else
     # HACK: emacs won't accept piped input as a file name, so we use --eval to open
     # the file via find-file.
     emacsclient --eval "$UMELISP"
 fi
+
+exit 0

@@ -10,6 +10,7 @@ setup() {
     # FIXME: why isn't this working?
     # PATH="$DIR/../:$PATH"
     # commands depend on being in the journal/ path.
+    export ORIGPWD=`pwd`
     cd $DIR/mockjournal
     # so that we can run next.sh without dealing with emacsclient.
     export UMNEXTECHO=true
@@ -17,7 +18,8 @@ setup() {
 
 teardown() {
     export UMNEXTECHO=false
-    cd -
+    cd $ORIGPWD
+    git restore $DIR/mockjournal
 }
 
 @test "um usage" {
@@ -65,6 +67,13 @@ um_next_awk() {
 @test "um last" {
     run um last
     assert_output '099.poo.md'
+}
+
+@test "um last empty" {
+    cd foo
+    run um last
+    assert_failure
+    assert_output 'no files found'
 }
 
 @test "um cat" {

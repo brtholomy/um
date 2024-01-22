@@ -80,25 +80,24 @@ Note the optional setup of `embark`, which allows us to visit files just by invo
 
 The "command line interface" is just a small set of convenient scripts: since these are just text files, we could just as easily create everything manually.
 
-1. To get started, create an empty directory to serve as content origin. It doesn't matter where or what it's called, since the shell scripts only assume a sequentially numbered collection of files.
-
-2. Decide on a zero-width for your series and seed the first file:
-
-  ```sh
-  touch 01.md
-  ```
-
-  The rest of the commands will now work with this width.
+To get started, create an empty directory to serve as content origin. It doesn't matter where or what it's called, since the shell scripts only assume a sequentially numbered collection of files.
 
 ## next
 
-Create a new file, open it with emacsclient, and run `um-journal-header`:
+To create a new file:
 
 ```sh
 um next
 ```
 
-Yields:
+This will create the file, open it with emacsclient, and run `um-journal-header` in that file:
+
+```markdown
+# 01.md
+: 2024.01.14
+```
+
+If you save this file and run `um next` again you get:
 
 ```markdown
 # 02.md

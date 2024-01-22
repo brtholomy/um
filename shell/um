@@ -2,6 +2,11 @@
 
 # export so that we can use it in subscripts.
 export UMBASEPATH=`realpath $0 | xargs dirname`
+# TODO: load a config file?
+export UMDEFAULTINIT='000.md'
+
+# TODO: decide if getopts would be better. positional args supposed to be bad.
+# https://stackoverflow.com/a/28466267
 
 # catch first arguments with $1
 case "$1" in
@@ -22,6 +27,6 @@ case "$1" in
         $UMBASEPATH/tag.sh $2
         ;;
     *)
-        echo "usage: um (next|last|cat|rename|tag)"
+        echo "usage: um (next|last|cat|rename|tag)"; exit 1
         ;;
 esac
