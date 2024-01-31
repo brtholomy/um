@@ -37,7 +37,7 @@
 
 ;; `um-grep-tag': search files with same tag
 
-(require 'package)
+(require 'project)
 
 ;; Primary path glob for the journal. This allows various mountpoints.
 
