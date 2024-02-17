@@ -8,7 +8,7 @@
 # in plain terms:
 #   [leading numbers with consistent width].[optional string descriptor and . separator][md|txt]
 
-UMALLFILES=`ls | egrep '^[[:digit:]].*\.(md|txt)'`
+UMALLFILES=`ls | grep -E '^[[:digit:]].*\.(md|txt)'`
 LASTSTATUS=$?
 
 # NOTE: if we don't stop and signal here, tail will exit 0
