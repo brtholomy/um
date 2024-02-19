@@ -86,12 +86,16 @@
 ;; find-file-at-point
 
 ;; the journal/ serves as content origin, so it must be treated specially.
-(setq um-journal-path (car (seq-filter
-                         (lambda (path)
-                           ;; this way I don't have to hardcode the full path:
-                           (string-match um-journal-path-glob path))
-                         ;; stores all project roots in a list of strings:
-                         (project-known-project-roots))))
+(defun um-journal-path()
+  (or (car (seq-filter
+            (lambda (path)
+              ;; this way I don't have to hardcode the full path:
+              (string-match um-journal-path-glob path))
+            ;; stores all project roots in a list of strings:
+            (project-known-project-roots)))
+      ;; fallback if not found
+      default-directory
+      ))
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; find-file C-x C-f solution
@@ -101,7 +105,7 @@
 ;; TODO: reuse same fallback logic as the embark advice if I keep this.
 ;;;###autoload
 (defun um-journal-find-file ()
-  (let ((default-directory um-journal-path)
+  (let ((default-directory (um-journal-path))
         (thing (thing-at-point 'filename))
         )
     (expand-file-name thing))
@@ -144,7 +148,7 @@ in the root dir.
      (cl-loop for project-path in
               (seq-remove
                (lambda (path)
-                 (or (string-match um-journal-path path)
+                 (or (string-match (um-journal-path) path)
                      (when (project-current)
                        (string-match (caddr (project-current)) path))
                      ))
@@ -156,7 +160,7 @@ in the root dir.
               ))
 
    ;; journal path
-   (let ((default-directory um-journal-path))
+   (let ((default-directory (um-journal-path)))
      (funcall origfunc))
    ))
 
