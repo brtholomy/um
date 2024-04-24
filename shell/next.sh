@@ -40,7 +40,7 @@ if [ $2 ]; then
     fi
 fi
 
-UMELISP="(progn (find-file \"$NEXTFILE\") (um-journal-header) $UMTAG (message \"creating $NEXTFILE\"))"
+UMELISP="(progn (setq um-next-file \"$NEXTFILE\") (find-file um-next-file) (um-journal-header) $UMTAG (message \"creating $NEXTFILE\"))"
 
 # for testing and piping
 if [ $UMNEXTECHO ]; then
