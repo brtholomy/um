@@ -193,7 +193,7 @@ in the root dir.
 NOTE: this searches in the current project root only.
 "
   (interactive)
-  (project-find-regexp (concat "\\+\\ " (thing-at-point 'word)))
+  (project-find-regexp (concat "\\+ " (thing-at-point 'word)))
   )
 
 ;; NOTE: to export files with a given tag:
