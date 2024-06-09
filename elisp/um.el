@@ -202,5 +202,23 @@ NOTE: this searches in the current project root only.
 ;; specify a target dir (since it appends the list from xargs I think).
 ;; Or, in dired, run `find-grep-dired'.
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; shell integration
+
+(defun um-next-file-shell (dir &optional header)
+  "Calls um next in the provided dir.
+
+With the option not to leave behind the um-journal-header.
+"
+  (let ((default-directory dir))
+    ;; https://emacs.stackexchange.com/a/19878
+    (eval (car (read-from-string (shell-command-to-string "export UMNEXTECHO=true; um next"))))
+    ;; HACK: so that the um-journal-header doesn't
+    ;; leave the file modified.
+    (unless header
+      (undo))
+    )
+  )
+
 
 (provide 'um)
