@@ -46,7 +46,7 @@ um_next_awk() {
 
 @test "um next empty elisp" {
     run um next
-    assert_output '(progn (find-file "100.md") (um-journal-header) (message "creating 100.md"))'
+    assert_output '(progn (setq um-next-file "100.md") (find-file um-next-file) (um-journal-header) (message "creating 100.md"))'
 }
 
 @test "um next descriptor" {
