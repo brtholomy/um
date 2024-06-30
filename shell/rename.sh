@@ -23,10 +23,10 @@ else
     TO=$2
 fi
 
-echo from: $FROM to: $TO
-
 # split the args by a newline so that awk reads them as separate "records"
 mvcmd=`echo "$FROM
 $TO" | awk -f $UMBASEPATH/rename.awk`
+
+echo mv $mvcmd
 
 mv $mvcmd
