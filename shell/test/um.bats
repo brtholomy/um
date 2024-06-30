@@ -89,6 +89,21 @@ um_next_awk() {
 + foo'
 }
 
+@test "um rename" {
+    run um rename 001.md blah
+    run ls 001*
+    assert_output '001.blah.md'
+    mv 001.blah.md 001.md
+}
+
+# this doesn't work because bats doesn't handle stdin the way a tty does.
+# @test "um rename piped" {
+#     run um last | um rename gloo
+#     run ls 099*
+#     assert_output '099.gloo.md'
+#     mv 099.gloo.md 099.poo.md
+# }
+
 um_rename_awk() {
     echo "$1
 $2" | awk -f $DIR/../rename.awk
