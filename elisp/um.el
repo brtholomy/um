@@ -205,14 +205,14 @@ NOTE: this searches in the current project root only.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; shell integration
 
-(defun um-next-file-shell (dir &optional header)
+(defun um-next-file-shell (dir &optional descriptor header)
   "Calls um next in the provided dir.
 
 With the option not to leave behind the um-journal-header.
 "
   (let ((default-directory dir))
     ;; https://emacs.stackexchange.com/a/19878
-    (eval (car (read-from-string (shell-command-to-string "export UMNEXTECHO=true; um next"))))
+    (eval (car (read-from-string (shell-command-to-string (concat "export UMNEXTECHO=true; um next" descriptor)))))
     ;; HACK: so that the um-journal-header doesn't
     ;; leave the file modified.
     (unless header
