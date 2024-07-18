@@ -30,24 +30,28 @@ LASTFILE=`$UMBASEPATH/last.sh || echo $UMDEFAULTINIT`
 NEXTFILE=`echo $LASTFILE | awk -f $UMBASEPATH/next.awk -v arg=$1`
 
 # tag is optional second arg to this script
-TAGINSERT='(previous-line) (insert "+ %s\\n") (next-line)'
 if [ $2 ]; then
     # + means insert the string descriptor as tag
     if [ $2 = '+' ]; then
-        UMTAG=$(printf "$TAGINSERT" "$1")
+        UMTAG="$1"
     else
-        UMTAG=$(printf "$TAGINSERT" "$2")
+        UMTAG="$2"
     fi
+    UMELISP=$(printf '(um-next "%s" "%s")' "$NEXTFILE" "$UMTAG")
+else
+    UMELISP=$(printf '(um-next "%s")' "$NEXTFILE")
 fi
 
-UMELISP="(progn (setq um-next-file \"$NEXTFILE\") (find-file um-next-file) (um-journal-header) $UMTAG (message \"creating $NEXTFILE\"))"
-
 # for testing and piping
-if [ $UMNEXTECHO ]; then
+if [ $UMNEXTPRINT ]; then
+    # NOTE: printf instead of echo, because echo inserts a newline, and we pipe
+    # this back into elisp for um-next-shell:
+    printf $NEXTFILE
+elif [ $UMNEXTTEST ]; then
     echo $UMELISP
 else
-    # HACK: emacs won't accept piped input as a file name, so we use --eval to open
-    # the file via find-file.
+    # NOTE: emacs won't accept piped input as a file name, so we use --eval to run
+    # um-next as elisp. Which also lets us add the header and tag.
     emacsclient --eval "$UMELISP"
 fi
 

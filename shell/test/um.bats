@@ -13,11 +13,11 @@ setup() {
     export ORIGPWD=`pwd`
     cd $DIR/mockjournal
     # so that we can run next.sh without dealing with emacsclient.
-    export UMNEXTECHO=true
+    export UMNEXTTEST=true
 }
 
 teardown() {
-    export UMNEXTECHO=false
+    export UMNEXTTEST=false
     cd $ORIGPWD
     git restore $DIR/mockjournal
 }
@@ -46,7 +46,7 @@ um_next_awk() {
 
 @test "um next empty elisp" {
     run um next
-    assert_output '(progn (setq um-next-file "100.md") (find-file um-next-file) (um-journal-header) (message "creating 100.md"))'
+    assert_output '(um-next "100.md")'
 }
 
 @test "um next descriptor" {
@@ -56,12 +56,12 @@ um_next_awk() {
 
 @test "um next descriptor tag" {
     run um next foo bar
-    assert_output --partial '(insert "+ bar\n")'
+    assert_output '(um-next "100.foo.md" "bar")'
 }
 
 @test "um next descriptor +" {
     run um next foo +
-    assert_output --partial '(insert "+ foo\n")'
+    assert_output '(um-next "100.foo.md" "foo")'
 }
 
 @test "um last" {
