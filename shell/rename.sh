@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # rename : renames the string descriptor used in numbered series.
 
 # Usage:

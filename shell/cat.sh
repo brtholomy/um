@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # cat for Markdown in my ultralight writing database
 # wherein concatenated filed need a "\n---\n\n" between them.
 
