@@ -107,6 +107,23 @@
 ;; `embark-target-finders', since I'd have to remove the file finder and put my
 ;; function in the same place in the list anyway.
 
+(defalias 'project-find-file-future-enter (kmacro "C-x p f M-n RET"))
+
+(defun find-file-in-project (&optional dir)
+  ;; (interactive)
+  (when-let* ((project (project-current nil dir))
+              (default-directory (project-root project)))
+    (project-find-file-in nil nil project)))
+
+(defun project-search-nointeractive ()
+  (fileloop-initialize-search
+   (thing-at-point 'filename t)
+   ;; XXX: See the comment in project-query-replace-regexp.
+   (cl-delete-if-not #'file-regular-p (project-files (project-current)))
+   'default)
+  (fileloop-continue)
+)
+
 ;;;###autoload
 (defun um-file-at-point-advice (origfunc)
   "Like find-file-at-point, but checks all known project paths.
@@ -122,8 +139,18 @@ TODO: Use a special directory name for potentials/ or the like, in case it's not
 in the root dir.
 "
   (or
+
    ;; current project
    (funcall origfunc)
+
+   ;; TODO: Trying to recurse down into current project directories.
+   ;; project-find-file does it fine, just don't want interactive
+   ;; completing-read call.
+
+   ;; none of these work:
+   ;; (find-file-in-project)
+   ;; (project-search-nointeractive)
+   ;; (project-find-file-future-enter)
 
    ;; all other projects
    (let ((result))
