@@ -65,23 +65,6 @@
    )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; journal/.project.el
-
-;; normally .git detection works fine. But for my journal/ I don't git.
-;; https://michael.stapelberg.ch/posts/2021-04-02-emacs-project-override/
-(defun um-project-override (dir)
-    "Returns the parent directory containing a .project.el file,
- if any, to override the standard project.el detection logic when
- needed.
-"
-    (let ((override (locate-dominating-file dir ".project.el")))
-      (if override
-          (list 'vc nil override)
-        nil)))
-;; Cannot use :hook because 'project-find-functions does not end in -hook
-(add-hook 'project-find-functions #'um-project-override)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; find-file-at-point
 
 ;; the journal/ serves as content origin, so it must be treated specially.
