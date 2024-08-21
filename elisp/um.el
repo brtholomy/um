@@ -107,22 +107,22 @@
 ;; `embark-target-finders', since I'd have to remove the file finder and put my
 ;; function in the same place in the list anyway.
 
-(defalias 'project-find-file-future-enter (kmacro "C-x p f M-n RET"))
+;; HACK: taken from project-find-file-in and project--files-in-directory.
+(defun find-directories-only (dir)
+  (let* ((default-directory dir)
+              (vc-dirs-ignores (mapcar
+                           (lambda (d)
+                             (concat d "/"))
+                           vc-directory-exclusion-list))
+              (command (format "%s -H . $s -type d"
+                               find-program
+                               (xref--find-ignores-arguments vc-dirs-ignores "./")
+                               ))
+              (outstr (shell-command-to-string command)))
 
-(defun find-file-in-project (&optional dir)
-  ;; (interactive)
-  (when-let* ((project (project-current nil dir))
-              (default-directory (project-root project)))
-    (project-find-file-in nil nil project)))
-
-(defun project-search-nointeractive ()
-  (fileloop-initialize-search
-   (thing-at-point 'filename t)
-   ;; XXX: See the comment in project-query-replace-regexp.
-   (cl-delete-if-not #'file-regular-p (project-files (project-current)))
-   'default)
-  (fileloop-continue)
-)
+    (mapcar (lambda (path)
+              (expand-file-name path dir)) (split-string outstr "\n"))
+    ))
 
 ;;;###autoload
 (defun um-file-at-point-advice (origfunc)
@@ -139,18 +139,20 @@ TODO: Use a special directory name for potentials/ or the like, in case it's not
 in the root dir.
 "
   (or
-
    ;; current project
    (funcall origfunc)
 
-   ;; TODO: Trying to recurse down into current project directories.
+   ;; NOTE: Recurse down into current project directories.
    ;; project-find-file does it fine, just don't want interactive
    ;; completing-read call.
-
-   ;; none of these work:
-   ;; (find-file-in-project)
-   ;; (project-search-nointeractive)
-   ;; (project-find-file-future-enter)
+   (let ((result) (start-dir (project-root (project-current))))
+     (cl-loop for path in
+              (find-directories-only start-dir)
+              do (let ((default-directory path))
+                   (setq result (funcall origfunc)))
+              if result
+              return result
+              ))
 
    ;; all other projects
    (let ((result))
