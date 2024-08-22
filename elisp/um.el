@@ -107,36 +107,17 @@
 ;; `embark-target-finders', since I'd have to remove the file finder and put my
 ;; function in the same place in the list anyway.
 
-;; HACK: taken from project-find-file-in and project--files-in-directory.
-(defun find-directories-only (dir)
-  (let* ((default-directory dir)
-              (vc-dirs-ignores (mapcar
-                           (lambda (d)
-                             (concat d "/"))
-                           vc-directory-exclusion-list))
-              (command (format "%s -H . $s -type d"
-                               find-program
-                               (xref--find-ignores-arguments vc-dirs-ignores "./")
-                               ))
-              (outstr (shell-command-to-string command)))
-
-    (mapcar (lambda (path)
-              (expand-file-name path dir)) (split-string outstr "\n"))
-    ))
-
 ;;;###autoload
 (defun um-file-at-point-advice (origfunc)
   "Like find-file-at-point, but checks all known project paths.
 
 In this order:
 1. current project root
-2. all other project roots
-3. journal/ path
+2. all subdirectories in current project
+3. all other project roots
+4. journal/ path
 
 Since journal/ is the origin and other projects shadow it.
-
-TODO: Use a special directory name for potentials/ or the like, in case it's not
-in the root dir.
 "
   (or
    ;; current project
@@ -145,13 +126,15 @@ in the root dir.
    ;; NOTE: Recurse down into current project directories.
    ;; project-find-file does it fine, just don't want interactive
    ;; completing-read call.
-   (let ((result) (start-dir (project-root (project-current))))
-     (cl-loop for path in
-              (find-directories-only start-dir)
-              do (let ((default-directory path))
-                   (setq result (funcall origfunc)))
+   (let ((result) (tap (thing-at-point 'filename t)))
+     ;; TODO: this is procedural thinking and not lisp-like:
+     (cl-loop for file in
+              (project-files (project-current))
+              do (let ((basename (file-name-nondirectory file)))
+                   (setq result (equal tap basename)))
               if result
-              return result
+              ;; see `embark-target-finders':
+              return (cons 'file file)
               ))
 
    ;; all other projects
