@@ -126,16 +126,17 @@ Since journal/ is the origin and other projects shadow it.
    ;; NOTE: Recurse down into current project directories.
    ;; project-find-file does it fine, just don't want interactive
    ;; completing-read call.
-   (let ((result) (tap (thing-at-point 'filename t)))
-     ;; TODO: this is procedural thinking and not lisp-like:
-     (cl-loop for file in
-              (project-files (project-current))
-              do (let ((basename (file-name-nondirectory file)))
-                   (setq result (equal tap basename)))
-              if result
-              ;; see `embark-target-finders':
-              return (cons 'file file)
-              ))
+   (when (project-current)
+     (let ((result) (tap (thing-at-point 'filename t)))
+       ;; TODO: this is procedural thinking and not lisp-like:
+       (cl-loop for file in
+                (project-files (project-current))
+                do (let ((basename (file-name-nondirectory file)))
+                     (setq result (equal tap basename)))
+                if result
+                ;; see `embark-target-finders':
+                return (cons 'file file)
+                )))
 
    ;; all other projects
    (let ((result))
