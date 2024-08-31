@@ -145,6 +145,22 @@ Yields:
 + foo
 ```
 
+Or send a list of tags separated by commas. `+` still works:
+
+```sh
+um next foo +,bar,baz
+```
+
+Yields:
+
+```markdown
+# 05.foo.md
+: 2024.01.14
++ foo
++ bar
++ baz
+```
+
 ## last
 
 `um last` will print the name of the last numbered file. This can be useful on its own, or like this:

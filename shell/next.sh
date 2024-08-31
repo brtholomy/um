@@ -31,13 +31,7 @@ NEXTFILE=`echo $LASTFILE | awk -f $UMBASEPATH/next.awk -v arg=$1`
 
 # tag is optional second arg to this script
 if [ $2 ]; then
-    # + means insert the string descriptor as tag
-    if [ $2 = '+' ]; then
-        UMTAG="$1"
-    else
-        UMTAG="$2"
-    fi
-    UMELISP=$(printf '(um-next "%s" "%s")' "$NEXTFILE" "$UMTAG")
+    UMELISP=$(printf '(um-next "%s" "%s")' "$NEXTFILE" "$2")
 else
     UMELISP=$(printf '(um-next "%s")' "$NEXTFILE")
 fi
