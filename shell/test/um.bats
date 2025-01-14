@@ -13,11 +13,11 @@ setup() {
     export ORIGPWD=`pwd`
     cd $DIR/mockjournal
     # so that we can run next.sh without dealing with emacsclient.
-    export UMNEXTTEST=true
+    export UMTEST=true
 }
 
 teardown() {
-    export UMNEXTTEST=false
+    export UMTEST=false
     cd $ORIGPWD
     git restore $DIR/mockjournal
 }
@@ -73,8 +73,7 @@ um_next_awk() {
 @test "um last empty" {
     cd foo
     run um last
-    assert_failure
-    assert_output 'no files found'
+    assert_output '000.md'
 }
 
 @test "um cat" {

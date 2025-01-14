@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Get the last file name of any numbered series of text files.
+# Get the last file name of any numbered series of text files and open it with emacs.
 
 # file format:
 # in regex terms:
@@ -9,13 +9,20 @@
 #   [leading numbers with consistent width].[optional string descriptor and . separator][md|txt]
 
 UMALLFILES=`ls | grep -E '^[[:digit:]].*\.(md|txt)'`
-LASTSTATUS=$?
+UMLASTSTATUS=$?
+UMLASTFILE=''
 
-# NOTE: if we don't stop and signal here, tail will exit 0
-if [ "$LASTSTATUS" -ne 0 ]; then
-    echo "no files found" >&2
-    exit 1
+if [ "$UMLASTSTATUS" -ne 0 ]; then
+    UMLASTFILE="$UMDEFAULTINIT"
+else
+    # NOTE: if var isn't quoted echo will change newlines to spaces
+    UMLASTFILE=`echo "$UMALLFILES" | tail -n 1`
 fi
 
-# NOTE: if var isn't quoted echo will change newlines to spaces
-echo "$UMALLFILES" | tail -n 1
+if [ "$UMDISABLEEMACS" = true ] || [ "$UMTEST" = true ] ; then
+    echo $UMLASTFILE
+    exit 0
+fi
+
+echo "emacsclient -n $UMLASTFILE"
+emacsclient -n $UMLASTFILE

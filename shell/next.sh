@@ -23,8 +23,8 @@
 #
 # See https://github.com/brtholomy/um#next
 
-# NOTE: handle the exit 1 case of last.sh
-LASTFILE=`$UMBASEPATH/last.sh || echo $UMDEFAULTINIT`
+# NOTE: we only want the filename, not to run emacs yet.
+LASTFILE=`UMDISABLEEMACS=true; $UMBASEPATH/last.sh`
 
 # NOTE: the optional $1 arg passed to awk with -v:
 NEXTFILE=`echo $LASTFILE | awk -f $UMBASEPATH/next.awk -v arg=$1`
@@ -37,11 +37,12 @@ else
 fi
 
 # for testing and piping
-if [ $UMNEXTPRINT ]; then
+# NOTE: bash booleans are such a pain, because they don't exist. https://stackoverflow.com/a/2953673
+if [ "$UMNEXTPRINT" = true ]; then
     # NOTE: printf instead of echo, because echo inserts a newline, and we pipe
     # this back into elisp for um-next-shell:
     printf $NEXTFILE
-elif [ $UMNEXTTEST ]; then
+elif [ "$UMTEST" = true ]; then
     echo $UMELISP
 else
     # NOTE: emacs won't accept piped input as a file name, so we use --eval to run
