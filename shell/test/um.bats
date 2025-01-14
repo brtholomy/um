@@ -59,9 +59,10 @@ um_next_awk() {
     assert_output '(um-next "100.foo.md" "bar")'
 }
 
+# elisp handles this now:
 @test "um next descriptor +" {
     run um next foo +
-    assert_output '(um-next "100.foo.md" "foo")'
+    assert_output '(um-next "100.foo.md" "+")'
 }
 
 @test "um last" {
