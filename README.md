@@ -163,11 +163,7 @@ Yields:
 
 ## last
 
-`um last` will print the name of the last numbered file. This can be useful on its own, or like this:
-
-```sh
-um last | xargs emacs
-```
+`um last` will open the name of the last numbered file with emacsclient.
 
 ## cat
 
