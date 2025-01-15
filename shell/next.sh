@@ -24,7 +24,7 @@
 # See https://github.com/brtholomy/um#next
 
 # NOTE: we only want the filename, not to run emacs yet.
-LASTFILE=`UMDISABLEEMACS=true; $UMBASEPATH/last.sh`
+LASTFILE=`UMDISABLEEMACS=true $UMBASEPATH/last.sh`
 
 # NOTE: the optional $1 arg passed to awk with -v:
 NEXTFILE=`echo $LASTFILE | awk -f $UMBASEPATH/next.awk -v arg=$1`
