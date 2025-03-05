@@ -160,25 +160,6 @@ Since journal/ is the origin and other projects shadow it.
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; C-x p p
-
-;;;###autoload
-(defun um-project-find-meta ()
-  (interactive)
-  ;; this works because `project-switch-project' overrides the dir:
-  (find-file (expand-file-name "*meta.md" (caddr (project-current))) t)
-  )
-
-;; overwrite
-(setq project-switch-commands
-      '(
-        (um-project-find-meta "open meta" "m")
-        (project-dired "dired")
-        (project-find-file "find file")
-        (project-find-regexp "find regexp")
-        ))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; tags
 
 ;; TODO: do I want to search all projects?
