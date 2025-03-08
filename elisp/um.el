@@ -79,15 +79,18 @@
 ;; combined with the hook into `file-name-at-point-functions', this means I can
 ;; run find-file at point, followed by M-n :
 
+;; Load like this:
+;; (add-hook 'file-name-at-point-functions 'um-journal-find-file)
+;;
 ;; TODO: reuse same fallback logic as the embark advice if I keep this.
+
 ;;;###autoload
 (defun um-journal-find-file ()
   (let ((default-directory (um-journal-path))
         (thing (thing-at-point 'filename))
         )
     (expand-file-name thing))
-)
-(add-hook 'file-name-at-point-functions 'um-journal-find-file nil t)
+  )
 
 ;;;;;;;;;;;;;;;;;;
 ;; Embark solution
