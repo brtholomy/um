@@ -40,13 +40,11 @@
 (defvar um-journal-path-glob ".*/writing/journal"
   "Primary path glob for the journal. This allows various mountpoints.")
 
+(defvar um-date-format "%Y-%m-%d"
+  "Format passed to `format-time-string' when creating `um-journal-header'. Defaults to ISO8601.")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; journal header
-
-(defun um-iso-8601 ()
-  "Insert a date stamp in ISO 8601 order, but with periods in place of dashes."
-  (format-time-string "%Y.%m.%d")
-  )
 
 ;;;###autoload
 (defun um-journal-header ()
@@ -56,11 +54,10 @@
 : date
 
 "
-   (interactive)
-   (insert
-    (format "# %s\n: %s\n\n" (buffer-name) (um-iso-8601))
-    )
-   )
+  (interactive)
+  (insert
+   (format "# %s\n: %s\n\n" (buffer-name) (format-time-string um-date-format))
+   ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; find-file-at-point
