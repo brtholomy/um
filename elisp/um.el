@@ -28,12 +28,10 @@
 ;; these source files.
 
 ;; features provided:
-;; `um-journal-header' defines the standard header
-;; `um-project-find-meta' via `project-switch-project': open a file like
-;; *meta.md in a given project.
-
-;; (Optional) `um-file-at-point-advice' via `embark-dwim': open file in known projects
-;; with fallback to journal/
+;; `um-journal-find-file' via `find-file': open a file under point in the
+;; current project, falling back to a source directory.
+;; `um-file-at-point-advice' via `embark-dwim': open file under point in all
+;; known projects, falling back to a source directory.
 
 ;; `um-grep-tag': search files with same tag
 
@@ -95,7 +93,7 @@
 (add-hook 'file-name-at-point-functions 'um-journal-find-file nil t)
 
 ;;;;;;;;;;;;;;;;;;
-;; Embark solution (optional)
+;; Embark solution
 
 ;; Load this with an advice:
 ;; (advice-add 'embark-target-file-at-point :around 'um-file-at-point-advice)
