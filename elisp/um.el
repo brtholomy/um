@@ -176,6 +176,36 @@ NOTE: this searches in the current project root only.
 ;; specify a target dir (since it appends the list from xargs I think).
 ;; Or, in dired, run `find-grep-dired'.
 
+(defun um-tag-insert (tag)
+  "Insert the given tag as + tag\n in current buffer."
+  (interactive "M")
+  (goto-char (point-min))
+  (search-forward "\n\n")
+  (previous-line)
+  (insert (concat "+ " tag "\n"))
+  )
+
+(defun um-tag-insert-dwim (tag)
+  "Run `um-tag-insert' on the filename at point, or a list of filenames if
+  region active or if marks exist in dired-mode.
+
+Assumes the files of interest are returned by `um-journal-path'.
+"
+  ;; TODO: should this be completing-read? Would like a history ring.
+  (interactive "Mtag: ")
+  (let ((files (if (region-active-p)
+                   (string-split (buffer-substring (region-beginning) (region-end)))
+                 (list (thing-at-point 'filename))))
+        ;; save-excursion is not working below, why?
+        (buf (current-buffer)))
+    (dolist (f files)
+      (find-file (expand-file-name f (um-journal-path)))
+      (um-tag-insert tag)
+      )
+    (switch-to-buffer buf)
+    (save-some-buffers t)
+    ))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; shell integration
 
