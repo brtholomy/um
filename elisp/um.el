@@ -186,25 +186,35 @@ NOTE: this searches in the current project root only.
   )
 
 (defun um-tag-insert-dwim (tag)
-  "Run `um-tag-insert' on the filename at point, or a list of filenames if
-  region active or if marks exist in dired-mode.
+  "Run `um-tag-insert' on a list of filenames if region active outside
+  dired-mode, or if marks exist in dired-mode, or the filename at point, and
+  finally in the current buffer if none of those conditions match.
 
 Assumes the files of interest are returned by `um-journal-path'.
 "
   ;; TODO: should this be completing-read? Would like a history ring.
   (interactive "Mtag: ")
-  (let ((files (if (region-active-p)
-                   (string-split (buffer-substring (region-beginning) (region-end)))
-                 (list (thing-at-point 'filename))))
-        ;; save-excursion is not working below, why?
-        (buf (current-buffer)))
-    (dolist (f files)
-      (find-file (expand-file-name f (um-journal-path)))
-      (um-tag-insert tag)
-      )
-    (switch-to-buffer buf)
-    (save-some-buffers t)
-    ))
+  (let* (
+         (marks (dired-get-marked-files))
+         ;; NOTE: existing-filename to avoid returning bogus strings:
+         (fap (thing-at-point 'existing-filename))
+         (files (cond
+                 ((and (region-active-p) (not (eq major-mode 'dired-mode)))
+                  (string-split (buffer-substring (region-beginning) (region-end))))
+                 ((and (eq major-mode 'dired-mode) marks) marks)
+                 (fap (list fap))
+                 ))
+         ;; save-excursion is not working below, why?
+         (buf (current-buffer)))
+
+    (if files (progn (dolist (f files)
+                       (find-file (expand-file-name f (um-journal-path)))
+                       (um-tag-insert tag)
+                       )
+                     (switch-to-buffer buf)
+                     (save-some-buffers t)
+                     )
+      (um-tag-insert tag))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; shell integration
