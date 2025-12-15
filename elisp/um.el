@@ -176,25 +176,28 @@ NOTE: this searches in the current project root only.
 ;; specify a target dir (since it appends the list from xargs I think).
 ;; Or, in dired, run `find-grep-dired'.
 
+;; NOTE: this will get saved by savehist-mode
+(defvar um-tags-history nil)
+
 (defun um-tag-insert (tag)
-  "Insert the given tag as + tag\n in current buffer."
-  (interactive "M")
+  "Insert TAG as + tag\n in current buffer appending to the journal header."
   (goto-char (point-min))
   (search-forward "\n\n")
   (previous-line)
   (insert (concat "+ " tag "\n"))
   )
 
-(defun um-tag-insert-dwim (tag)
+;;;###autoload
+(defun um-tag-insert-dwim ()
   "Run `um-tag-insert' on a list of filenames if region active outside
   dired-mode, or if marks exist in dired-mode, or the filename at point, and
   finally in the current buffer if none of those conditions match.
 
 Assumes the files of interest are returned by `um-journal-path'.
 "
-  ;; TODO: should this be completing-read? Would like a history ring.
-  (interactive "Mtag: ")
+  (interactive)
   (let* (
+         (tag (completing-read "tag: " um-tags-history nil nil nil 'um-tags-history))
          (marks (dired-get-marked-files))
          ;; NOTE: existing-filename to avoid returning bogus strings:
          (fap (thing-at-point 'existing-filename))
@@ -214,7 +217,9 @@ Assumes the files of interest are returned by `um-journal-path'.
                      (switch-to-buffer buf)
                      (save-some-buffers t)
                      )
-      (um-tag-insert tag))))
+      (um-tag-insert tag))
+    (let ((history-delete-duplicates t))
+      (add-to-history 'um-tags-history tag))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; shell integration
