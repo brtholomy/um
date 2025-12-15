@@ -199,8 +199,9 @@ Assumes the files of interest are returned by `um-journal-path'.
   (let* (
          (tag (completing-read "tag: " um-tags-history nil nil nil 'um-tags-history))
          (marks (dired-get-marked-files))
-         ;; NOTE: existing-filename to avoid returning bogus strings:
-         (fap (thing-at-point 'existing-filename))
+         ;; NOTE: 'existing-filename would be better to avoid bogus strings, but
+         ;; in view-mode when in another project, we can't verify it exists yet:
+         (fap (thing-at-point 'filename))
          (files (cond
                  ((and (region-active-p) (not (eq major-mode 'dired-mode)))
                   (string-split (buffer-substring (region-beginning) (region-end))))
