@@ -65,7 +65,7 @@ My config looks like this:
 (use-package um
   :after (project embark)
 
-  :init (setq um-root-glob ".*/writing/journal")
+  :custom (um-root-glob ".*/writing/journal")
 
   :config
   (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)

@@ -37,11 +37,15 @@
 
 (require 'project)
 
-(defvar um-root-glob ".*/writing/journal"
-  "Primary glob for `um-root-path.' This allows various mountpoints.")
+(defcustom um-root-glob ".*/writing/journal"
+  "Primary glob for `um-root-path.' This allows various mountpoints."
+  :type '(string)
+  )
 
-(defvar um-date-format "%Y-%m-%d"
-  "Format passed to `format-time-string' when creating `um-journal-header'. Defaults to ISO8601.")
+(defcustom um-date-format "%Y-%m-%d"
+  "Format passed to `format-time-string' when creating `um-journal-header'. Defaults to ISO8601."
+  :type '(string)
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; journal header
