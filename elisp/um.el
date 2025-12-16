@@ -198,20 +198,21 @@ Assumes the files of interest are returned by `um-journal-path'.
   (interactive)
   (let* (
          (tag (completing-read "tag: " um-tags-history nil nil nil 'um-tags-history))
-         (marks (dired-get-marked-files))
+         (marks (if (eq major-mode 'dired-mode) (dired-get-marked-files) nil))
          ;; NOTE: 'existing-filename would be better to avoid bogus strings, but
          ;; in view-mode when in another project, we can't verify it exists yet:
          (fap (thing-at-point 'filename))
          (files (cond
                  ((and (region-active-p) (not (eq major-mode 'dired-mode)))
                   (string-split (buffer-substring (region-beginning) (region-end))))
-                 ((and (eq major-mode 'dired-mode) marks) marks)
+                 (marks marks)
                  (fap (list fap))
                  ))
          ;; save-excursion is not working below, why?
          (buf (current-buffer)))
 
     (if files (progn (dolist (f files)
+                       ;; TODO: this should use the fallback logic:
                        (find-file (expand-file-name f (um-journal-path)))
                        (um-tag-insert tag)
                        )
