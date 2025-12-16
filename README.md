@@ -39,7 +39,7 @@ This "database" depends on a few simple ideas:
 
     See the `um cat` command for why this matters.
 
-3. Using a source "journal/" directory, where source files should first be composed and where we can assume a file exists if not elsewhere. This matters when trying to navigate back to a source file.
+3. Using a single "root" project defined by `um-root-glob`, where source files should first be composed and where we can assume a file exists if not elsewhere. This matters when trying to navigate back to a source file.
 
 4. Using the built-in emacs `project` package to organize compositions built from these source files.
 
@@ -65,6 +65,8 @@ My config looks like this:
 (use-package um
   :after (project embark)
 
+  :init (setq um-root-glob ".*/writing/journal")
+
   :config
   (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
 
@@ -76,11 +78,11 @@ Note the optional setup of `embark`, which allows us to find files intelligently
 
 # ultralight "database"
 
-What I consider the killer feature of `um` is the ability to jump to files from filenames listed in any "child" project back to the "source" project, defined via `um-journal-path-glob`. This means that child projects can be initially defined as simple lists of filenames, which I do to compose larger pieces. A simple filename anywhere can also serve as a "link".
+What I consider the killer feature of `um` is the ability to jump to files from filenames listed in any "child" project back to the "source" project, defined via `um-root-glob`. This means that child projects can be initially defined as simple lists of filenames, which I do to compose larger pieces. A simple filename anywhere can also serve as a "link".
 
 There are two primary ways this is accessed:
 
-1. `find-file` and `next-history-element`, which will work as `C-x C-f M-n` out of the box.
+1. `find-file` and `next-history-element`, which will work as `C-x C-f M-n` out of the box. See `um-find-file-at-point`.
 2. By invoking `emark-dwim` on any filename. Requires `embark` and the `advice-add` shown above.
 
 # CLI usage

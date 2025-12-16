@@ -21,7 +21,7 @@
 ;; 2. Placing that same id into the file header, so that concatenated files
 ;; have reference back to their source. See the `um cat` command.
 
-;; 3. Using a source "journal/" directory, where source files should first be
+;; 3. Using a source `um-root-glob' directory, where source files should first be
 ;; composed and where we can assume a file exists if not elsewhere.
 
 ;; 4. Using the built-in `project' package to organize compositions built from
@@ -37,8 +37,8 @@
 
 (require 'project)
 
-(defvar um-journal-path-glob ".*/writing/journal"
-  "Primary path glob for the journal. This allows various mountpoints.")
+(defvar um-root-glob ".*/writing/journal"
+  "Primary glob for `um-root-path.' This allows various mountpoints.")
 
 (defvar um-date-format "%Y-%m-%d"
   "Format passed to `format-time-string' when creating `um-journal-header'. Defaults to ISO8601.")
@@ -63,12 +63,11 @@
 ;; find-file-at-point
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; the journal/ serves as content origin, so it must be treated specially.
-(defun um-journal-path ()
+(defun um-root-path ()
   (or (car (seq-filter
             (lambda (path)
               ;; this way I don't have to hardcode the full path:
-              (string-match um-journal-path-glob path))
+              (string-match um-root-glob path))
             ;; stores all project roots in a list of strings:
             (project-known-project-roots)))
       ;; fallback if not found
@@ -84,12 +83,12 @@
 
 ;;;###autoload
 (defun um-find-file-at-point ()
-  "Return full file path of thing-at-point, falling back first to
-`project-root', then to `um-journal-path'."
+  "Return full file path of thing-at-point, beginning with `default-directory',
+falling back to `project-root', then to `um-root-path'."
   (let ((dirs (list
                default-directory
                (project-root (project-current))
-               (um-journal-path)))
+               (um-root-path)))
         dir
         file)
     (while (and dirs (not file))
@@ -156,7 +155,7 @@ Since journal/ is the origin and other projects shadow it.
      (cl-loop for project-path in
               (seq-remove
                (lambda (path)
-                 (or (string-match (um-journal-path) path)
+                 (or (string-match (um-root-path) path)
                      (when (project-current)
                        (string-match (caddr (project-current)) path))
                      ))
@@ -168,7 +167,7 @@ Since journal/ is the origin and other projects shadow it.
               ))
 
    ;; journal path
-   (let ((default-directory (um-journal-path)))
+   (let ((default-directory (um-root-path)))
      (funcall origfunc))
    ))
 
@@ -208,7 +207,7 @@ NOTE: this searches in the current project root only.
   dired-mode, or if marks exist in dired-mode, or the filename at point, and
   finally in the current buffer if none of those conditions match.
 
-Assumes the files of interest are returned by `um-journal-path'.
+Assumes the files of interest are returned by `um-root-path'.
 "
   (interactive)
   (let* (
@@ -228,7 +227,7 @@ Assumes the files of interest are returned by `um-journal-path'.
 
     (if files (progn (dolist (f files)
                        ;; TODO: this should use the fallback logic:
-                       (find-file (expand-file-name f (um-journal-path)))
+                       (find-file (expand-file-name f (um-root-path)))
                        (um-tag-insert tag)
                        )
                      (switch-to-buffer buf)
