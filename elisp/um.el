@@ -28,9 +28,9 @@
 ;; these source files.
 
 ;; features provided:
-;; `um-journal-find-file' via `find-file': open a file under point in the
+;; `um-find-file-at-point' via `find-file': open a file under point in the
 ;; current project, falling back to a source directory.
-;; `um-file-at-point-advice' via `embark-dwim': open file under point in all
+;; `um-target-file-at-point-advice' via `embark-dwim': open file under point in all
 ;; known projects, falling back to a source directory.
 
 ;; `um-grep-tag': search files with same tag
@@ -61,9 +61,10 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; find-file-at-point
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; the journal/ serves as content origin, so it must be treated specially.
-(defun um-journal-path()
+(defun um-journal-path ()
   (or (car (seq-filter
             (lambda (path)
               ;; this way I don't have to hardcode the full path:
@@ -74,29 +75,43 @@
       default-directory
       ))
 
-;;;;;;;;;;;;;;;;;;;;;
-;; find-file C-x C-f solution
-;; combined with the hook into `file-name-at-point-functions', this means I can
-;; run find-file at point, followed by M-n :
-
-;; Load like this:
-;; (add-hook 'file-name-at-point-functions 'um-journal-find-file)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; `find-file' integration
 ;;
-;; TODO: reuse same fallback logic as the embark advice if I keep this.
+;; combined with the hook into `file-name-at-point-functions', this means we can
+;; run `find-file' at point, followed by `next-history-element'. By default:
+;; C-x C-f M-n
 
 ;;;###autoload
-(defun um-journal-find-file ()
-  (let ((default-directory (um-journal-path))
-        (thing (thing-at-point 'filename))
-        )
-    (expand-file-name thing))
-  )
+(defun um-find-file-at-point ()
+  "Return full file path of thing-at-point, falling back first to
+`project-root', then to `um-journal-path'."
+  (let ((dirs (list
+               default-directory
+               (project-root (project-current))
+               (um-journal-path)))
+        dir
+        file)
+    (while (and dirs (not file))
+      (setq dir (car dirs)
+            dirs (cdr dirs))
+      (let* ((default-directory dir)
+             (fap (thing-at-point 'existing-filename t)))
+        (when fap
+          (setq file (expand-file-name fap)))))
+    file))
 
-;;;;;;;;;;;;;;;;;;
+;; NOTE: we now load this by default if the package is loaded.
+(add-hook 'file-name-at-point-functions 'um-find-file-at-point)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Embark solution
 
+;; TODO: unite these two routines. Consider removing the subdirectory recursion
+;; and searching all known projects.
+
 ;; Load this with an advice:
-;; (advice-add 'embark-target-file-at-point :around 'um-file-at-point-advice)
+;; (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
 
 ;; `embark-target-file-at-point' uses `ffap-file-at-point', which uses
 ;; `default-directory' to expand the filename.
@@ -106,7 +121,7 @@
 ;; function in the same place in the list anyway.
 
 ;;;###autoload
-(defun um-file-at-point-advice (origfunc)
+(defun um-target-file-at-point-advice (origfunc)
   "Like find-file-at-point, but checks all known project paths.
 
 In this order:

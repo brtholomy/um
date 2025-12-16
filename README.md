@@ -48,16 +48,16 @@ This "database" depends on a few simple ideas:
 Clone it:
 
 ```sh
-git clone https://github.com/brtholomy/um.git ~/um
+git clone https://github.com/brtholomy/um.git ~/.emacs.d/um
 ```
 
 Symlink the `um` CLI somewhere in your `PATH`:
 
 ```sh
-ln -s ~/um/shell/um /usr/local/bin/um
+ln -s ~/.emacs.d/um/shell/um /usr/local/bin/um
 ```
 
-## emacs config
+## config
 
 My config looks like this:
 
@@ -66,15 +66,22 @@ My config looks like this:
   :after (project embark)
 
   :config
-  (defalias 'journal 'um-journal-header)
+  (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
 
-  (advice-add 'embark-target-file-at-point :around 'um-file-at-point-advice)
-
-  :load-path "~/um/elisp"
+  :load-path "um/elisp"
 )
 ```
 
-Note the optional setup of `embark`, which allows us to visit files just by invoking `emark-dwim` on a file header. This will also work with `C-x C-f M-n` out of the box.
+Note the optional setup of `embark`, which allows us to find files intelligently, explained below.
+
+# ultralight "database"
+
+What I consider the killer feature of `um` is the ability to jump to files from filenames listed in any "child" project back to the "source" project, defined via `um-journal-path-glob`. This means that child projects can be initially defined as simple lists of filenames, which I do to compose larger pieces. A simple filename anywhere can also serve as a "link".
+
+There are two primary ways this is accessed:
+
+1. `find-file` and `next-history-element`, which will work as `C-x C-f M-n` out of the box.
+2. By invoking `emark-dwim` on any filename. Requires `embark` and the `advice-add` shown above.
 
 # CLI usage
 
