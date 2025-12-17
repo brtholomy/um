@@ -87,8 +87,12 @@
 
 ;;;###autoload
 (defun um-find-file-at-point ()
-  "Return full file path of thing-at-point, beginning with `default-directory',
-falling back to `project-root', then to `um-root-path'."
+  "Return full file path of thing-at-point, falling back to:
+
+1. `default-directory'
+2. `project-root'
+3. `um-root-path'
+"
   (let ((dirs (list
                default-directory
                (project-root (project-current))
@@ -108,11 +112,8 @@ falling back to `project-root', then to `um-root-path'."
 (add-hook 'file-name-at-point-functions 'um-find-file-at-point)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Embark solution
-
-;; TODO: unite these two routines. Consider removing the subdirectory recursion
-;; and searching all known projects.
-
+;; `embark-dwim' integration
+;;
 ;; Load this with an advice:
 ;; (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
 
@@ -125,52 +126,15 @@ falling back to `project-root', then to `um-root-path'."
 
 ;;;###autoload
 (defun um-target-file-at-point-advice (origfunc)
-  "Like find-file-at-point, but checks all known project paths.
+  "Wrapper for `embark-target-file-at-point' that falls back to:
 
-In this order:
-1. current project root
-2. all subdirectories in current project
-3. all other project roots
-4. journal/ path
-
-Since journal/ is the origin and other projects shadow it.
+1. `default-directory'
+2. `project-root'
+3. `um-root-path'
 "
   (or
-   ;; current project
+   ;; this does both default-directory and project-root:
    (funcall origfunc)
-
-   ;; NOTE: Recurse down into current project directories.
-   ;; project-find-file does it fine, just don't want interactive
-   ;; completing-read call.
-   (when (project-current)
-     (let ((result) (tap (thing-at-point 'filename t)))
-       ;; TODO: this is procedural thinking and not lisp-like:
-       (cl-loop for file in
-                (project-files (project-current))
-                do (let ((basename (file-name-nondirectory file)))
-                     (setq result (equal tap basename)))
-                if result
-                ;; see `embark-target-finders':
-                return (cons 'file file)
-                )))
-
-   ;; all other projects
-   (let ((result))
-     (cl-loop for project-path in
-              (seq-remove
-               (lambda (path)
-                 (or (string-match (um-root-path) path)
-                     (when (project-current)
-                       (string-match (caddr (project-current)) path))
-                     ))
-               (project-known-project-roots))
-              do (let ((default-directory project-path))
-                   (setq result (funcall origfunc)))
-              if result
-              return result
-              ))
-
-   ;; journal path
    (let ((default-directory (um-root-path)))
      (funcall origfunc))
    ))
