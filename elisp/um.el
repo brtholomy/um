@@ -145,8 +145,24 @@
 ;; NOTE: this will get saved by savehist-mode
 (defvar um-tags-history nil)
 
+(defconst um-tag-regexp "^\\+ \\(.*\\)$")
+
+(defun um-header-current-buffer ()
+  (car (split-string (buffer-substring-no-properties (point-min) (point-max))
+                     "\n\n" t
+                     )))
+
+(defun um-tag-first-in-current-buffer ()
+  (let ((header (um-header-current-buffer)))
+    (string-match um-tag-regexp header)
+    (match-string 1 header)
+    ))
+
 (defun um-grep-tag ()
   "Run `project-find-regexp' on a selection made from `um-tags-history' via `completing-read'.
+
+The initial value provided to `completing-read' is the first tag found in the
+current buffer: it will be first in the list and available via \\`M-n'.
 
 NOTE: searches in the current project root by default, but
 \\[universal-argument] will allow choice of the base directory as in `project-find-regexp'.
@@ -155,7 +171,13 @@ Ultimately this relies on `xref-matches-in-files', which calls `xref-search-prog
 "
   (interactive)
   (project-find-regexp (concat "^\\+ "
-                               (completing-read "um tag: " um-tags-history)
+                               (completing-read "um tag: " um-tags-history nil
+                                                nil nil
+                                                ;; NOTE: this means searches
+                                                ;; will add to the history:
+                                                'um-tags-history
+                                                (um-tag-first-in-current-buffer)
+                                                )
                                "$")))
 
 (defun um-tag-insert (tag)
