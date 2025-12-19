@@ -142,24 +142,21 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; tags
 
-;; TODO: do I want to search all projects?
-(defun um-grep-tag ()
-  "Run project-find-regexp on the current identifer as a journal frontmatter tag.
-
-NOTE: this searches in the current project root only.
-"
-  (interactive)
-  (project-find-regexp (concat "^\\+ " (thing-at-point 'word) "$"))
-  )
-
-;; NOTE: to export files with a given tag:
-;; grep -l '\+ TAG' *md | xargs cp -t /tmp/
-;; note the -l flag to grep to output files only, and the -t flag to cp to
-;; specify a target dir (since it appends the list from xargs I think).
-;; Or, in dired, run `find-grep-dired'.
-
 ;; NOTE: this will get saved by savehist-mode
 (defvar um-tags-history nil)
+
+(defun um-grep-tag ()
+  "Run `project-find-regexp' on a selection made from `um-tags-history' via `completing-read'.
+
+NOTE: searches in the current project root by default, but
+\\[universal-argument] will allow choice of the base directory as in `project-find-regexp'.
+
+Ultimately this relies on `xref-matches-in-files', which calls `xref-search-program'.
+"
+  (interactive)
+  (project-find-regexp (concat "^\\+ "
+                               (completing-read "um tag: " um-tags-history)
+                               "$")))
 
 (defun um-tag-insert (tag)
   "Insert TAG as + tag\n in current buffer appending to the journal header."
