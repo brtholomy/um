@@ -95,7 +95,7 @@
 "
   (let ((dirs (list
                default-directory
-               (project-root (project-current))
+               (when (project-current) (project-root (project-current)))
                (um-root-path)))
         dir
         file)
