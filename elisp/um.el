@@ -143,7 +143,8 @@
 ;; tags
 
 ;; NOTE: this will get saved by savehist-mode
-(defvar um-tags-history nil)
+(defvar um-tags-history nil "History of inserted or searched for tags. Populates
+`completing-read'.")
 
 (defconst um-tag-regexp "^\\+ \\(.*\\)$")
 
@@ -198,7 +199,7 @@ Assumes the files of interest are returned by `um-root-path'.
 "
   (interactive)
   (let* (
-         (tag (completing-read "tag: " um-tags-history nil nil nil 'um-tags-history))
+         (tag (completing-read "insert um tag: " um-tags-history nil nil nil 'um-tags-history))
          (marks (if (eq major-mode 'dired-mode) (dired-get-marked-files) nil))
          ;; NOTE: 'existing-filename would be better to avoid bogus strings, but
          ;; in view-mode when in another project, we can't verify it exists yet:
