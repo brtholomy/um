@@ -67,6 +67,10 @@ My config looks like this:
 
   :custom (um-root-glob ".*/writing/journal")
 
+  :bind
+  ("M-s t" . um-tag-grep)
+  ("M-r t" . um-tag-dwim)
+
   :config
   (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
 

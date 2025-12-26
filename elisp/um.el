@@ -32,8 +32,8 @@
 ;; current project, falling back to a source directory.
 ;; `um-target-file-at-point-advice' via `embark-dwim': open file under point in all
 ;; known projects, falling back to a source directory.
-
-;; `um-grep-tag': search files with same tag
+;; `um-tag-grep': search files with some tag
+;; `um-tag-dwim': insert or delete a tag in dired and other contexts.
 
 (require 'project)
 
@@ -159,7 +159,7 @@
     (match-string 1 header)
     ))
 
-(defun um-grep-tag ()
+(defun um-tag-grep ()
   "Run `project-find-regexp' on a selection made from `um-tags-history' via `completing-read'.
 
 The initial value provided to `completing-read' is the first tag found in the
@@ -206,7 +206,7 @@ insert when INSERT > 0, delete otherwise."
     (um-tag-delete tag)))
 
 ;;;###autoload
-(defun um-tag-insert-dwim (ARG)
+(defun um-tag-dwim (ARG)
   "Run `um-tag-do' on a list of filenames if region active outside
   dired-mode, or if marks exist in dired-mode, or the filename at point, and
   finally in the current buffer if none of those conditions match.
