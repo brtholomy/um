@@ -189,15 +189,33 @@ Ultimately this relies on `xref-matches-in-files', which calls `xref-search-prog
   (insert (concat "+ " tag "\n"))
   )
 
+(defun um-tag-delete (tag)
+  "Delete TAG from the journal header in current buffer."
+  (goto-char (point-min))
+  (search-forward (concat "+ " tag "\n"))
+  (previous-line)
+  (kill-line)
+  )
+
+(defun um-tag-do (tag insert)
+  "Insert or delete TAG from the journal header in current buffer.
+
+insert when INSERT > 0, delete otherwise."
+  (if (> insert 0)
+      (um-tag-insert tag)
+    (um-tag-delete tag)))
+
 ;;;###autoload
-(defun um-tag-insert-dwim ()
-  "Run `um-tag-insert' on a list of filenames if region active outside
+(defun um-tag-insert-dwim (ARG)
+  "Run `um-tag-do' on a list of filenames if region active outside
   dired-mode, or if marks exist in dired-mode, or the filename at point, and
   finally in the current buffer if none of those conditions match.
 
 Assumes the files of interest are returned by `um-root-path'.
+
+Negative prefix arg is handled by `um-tag-do', which see.
 "
-  (interactive)
+  (interactive "p")
   (let* (
          (tag (completing-read "insert um tag: " um-tags-history nil nil nil 'um-tags-history))
          (marks (if (eq major-mode 'dired-mode) (dired-get-marked-files) nil))
@@ -216,12 +234,12 @@ Assumes the files of interest are returned by `um-root-path'.
     (if files (progn (dolist (f files)
                        ;; TODO: this should use the fallback logic:
                        (find-file (expand-file-name f (um-root-path)))
-                       (um-tag-insert tag)
+                       (um-tag-do tag ARG)
                        )
                      (switch-to-buffer buf)
                      (save-some-buffers t)
                      )
-      (um-tag-insert tag))
+      (um-tag-do tag ARG))
     (let ((history-delete-duplicates t))
       (add-to-history 'um-tags-history tag))))
 
