@@ -240,8 +240,7 @@ Negative prefix arg is handled by `um-tag-do', which see.
                      (save-some-buffers t)
                      )
       (um-tag-do tag ARG))
-    (let ((history-delete-duplicates t))
-      (add-to-history 'um-tags-history tag))))
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; shell integration
