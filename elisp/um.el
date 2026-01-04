@@ -47,6 +47,48 @@
   :type '(string)
   )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; faces
+
+(defconst um-date-re "^: \\([[:digit:]]+\\.[[:digit:]]+\\.[[:digit:]]+$\\)" "um date regexp")
+
+;; NOTE: regexp-opt wraps the whole expression in (), so I can't omit the -.
+(defcustom um-locale-re (regexp-opt '(
+                                      "- Brooklyn"
+                                      "- Fool's Bluff"
+                                      )) "um locale regexp")
+
+(defconst um-tag-re "^\\+ \\([[:alpha:]\\_\\-]+$\\)" "um tag regexp")
+
+(defface font-lock-um-date-face
+  `((((type tty) (class mono)))
+    (t (
+        :inherit shadow
+        )))
+  "um date face")
+
+(defface font-lock-um-locale-face
+  `((((type tty) (class mono)))
+    (t (
+        :inherit shadow
+        )))
+  "um locale face")
+
+(defface font-lock-um-tag-face
+  `((((type tty) (class mono)))
+    (t (
+        :inherit shadow
+        )))
+  "um tag face")
+
+;; TODO: should this be a user setup hook?
+(font-lock-add-keywords 'markdown-mode
+                        `(
+                          (,um-date-re 1 'font-lock-um-date-face)
+                          (,um-locale-re 0 'font-lock-um-locale-face)
+                          (,um-tag-re 1 'font-lock-um-tag-face)
+                          ))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; journal header
 
