@@ -1,26 +1,48 @@
 package tag
 
 import (
-	"flag"
 	"fmt"
-
-	"github.com/brtholomy/um/go/flags"
+	"reflect"
+	"strings"
 )
 
-const (
-	query  flags.Flag = "query"
-	invert flags.Flag = "invert"
-)
+var opts struct {
+	query  string `name:"query" help:"tag query"`
+	invert bool   `name:"invert" help:"invert match"`
+}
+
+func stripDashes(flag string) string {
+	return strings.TrimPrefix(flag, "--")
+}
 
 func Tag(args []string) {
-	tagFlags := flag.NewFlagSet("tag", flag.ExitOnError)
-	tagQuery := tagFlags.String(string(query), "", "tag query")
-	tagInvert := tagFlags.Bool(string(invert), false, "invert match")
 
-	tagFlags.Parse(flags.PrependFlagToArgs(args, query))
+	// reflection!
+	t := reflect.TypeOf(opts)
+	field := reflect.StructField{}
+	found := false
+	for _, a := range args {
+		field, found = t.FieldByName(stripDashes(a))
+		if !found {
+			fmt.Printf("%s not found in opts\n", a)
+			return
+		}
+	}
+	tag := field.Tag
 
-	fmt.Printf("query: %#v\n", *tagQuery)
-	fmt.Printf("invert: %#v\n", *tagInvert)
-	fmt.Printf("args: %#v\n", tagFlags.Args())
-	tagFlags.Usage()
+	fmt.Printf("field name: %#v\n", tag.Get("name"))
+	fmt.Printf("field help: %#v\n", tag.Get("help"))
+
+	// for i := 0; i < t.NumField(); i++ {
+	// 	field := t.Field(i)
+	// 	if alias, ok := field.Tag.Lookup("name"); ok {
+	// 		if alias == "" {
+	// 			fmt.Println("(blank)")
+	// 		} else {
+	// 			fmt.Println(alias)
+	// 		}
+	// 	} else {
+	// 		fmt.Println("(not specified)")
+	// 	}
+	// }
 }
