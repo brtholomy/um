@@ -24,23 +24,19 @@ func InitOpts() options {
 
 func ParseArgs(args []string) options {
 	opts := InitOpts()
-	if len(args) == 0 {
-		return opts
-	}
-	if !flags.HasDashPrefix(args[0]) {
-		opts.Query.Val = args[0]
-	}
 	for i, arg := range args {
-		switch arg {
-		case opts.Invert.Long, opts.Invert.Short:
+		switch {
+		case i == 0 && !flags.HasDashPrefix(arg):
+			opts.Query.Val = arg
+		case arg == opts.Invert.Long || arg == opts.Invert.Short:
 			opts.Invert.Val = true
-		case opts.Date.Long, opts.Date.Short:
+		case arg == opts.Date.Long || arg == opts.Date.Short:
 			if flags.MissingValueArg(args, i) {
 				flags.HelpMissingVal(arg)
 				break
 			}
 			opts.Date.Val = args[i+1]
-		case opts.Help.Long, opts.Help.Short:
+		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("tag", opts)
 			return opts
 		}
