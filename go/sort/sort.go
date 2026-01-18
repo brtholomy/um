@@ -37,7 +37,7 @@ func parseArgs(args []string) options {
 			}
 			opts.Key.Val = args[i+1]
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help("tag", opts)
+			flags.Help("sort", opts)
 			return opts
 		}
 	}
