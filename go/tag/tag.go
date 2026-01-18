@@ -2,62 +2,49 @@ package tag
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
-	"unicode"
+
+	"github.com/brtholomy/um/go/flags"
 )
 
-var opts struct {
-	Query  string `name:"query" help:"tag query"`
-	Invert bool   `name:"invert" help:"invert match"`
+type options struct {
+	query  flags.Arg
+	date   flags.Flag
+	invert flags.FlagBool
 }
 
-func flagToField(flag string) string {
-	s := strings.TrimPrefix(flag, "--")
-	r := []rune(s)
-	r[0] = unicode.ToUpper(r[0])
-	return string(r)
+func InitOpts() options {
+	return options{
+		flags.Arg{"", "tag query"},
+		flags.Flag{"--date", "-d", "", "date range"},
+		flags.FlagBool{"--invert", "-i", false, "invert match"},
+	}
+}
+
+func ParseArgs(args []string) options {
+	opts := InitOpts()
+	if len(args) == 0 {
+		return opts
+	}
+	if flags.HasDashPrefix(args[0]) {
+		opts.query.Val = args[0]
+	}
+	for i, arg := range args {
+		switch arg {
+		case opts.invert.Long, opts.invert.Short:
+			opts.invert.Val = true
+		case opts.date.Long:
+			if flags.MissingValueArg(args, i) {
+				flags.HelpMissingVal(arg)
+				break
+			}
+			opts.date.Val = args[i+1]
+		}
+	}
+	return opts
 }
 
 func Tag(args []string) {
-
-	// reflection!
-	t := reflect.TypeOf(opts)
-	field := reflect.StructField{}
-	found := false
-	for _, a := range args {
-		field, found = t.FieldByName(flagToField(a))
-		if !found {
-			fmt.Printf("%s not found in opts\n", a)
-			return
-		}
-	}
-	tag := field.Tag
-
-	fmt.Printf("field name: %#v\n", tag.Get("name"))
-	fmt.Printf("field help: %#v\n", tag.Get("help"))
-
-	v := reflect.ValueOf(opts)
-	vfield := reflect.Value{}
-	for _, a := range args {
-		vfield = v.FieldByName(flagToField(a))
-		if vfield.IsValid() && vfield.CanSet() && vfield.Kind() == reflect.Bool {
-			vfield.SetBool(true)
-			fmt.Printf("vfield: %#v\n", vfield)
-		}
-	}
-	fmt.Printf("vfield: %#v\n", vfield)
+	fmt.Printf("args: %#v\n", args)
+	opts := ParseArgs(args)
 	fmt.Printf("opts: %#v\n", opts)
-	// for i := 0; i < t.NumField(); i++ {
-	// 	field := t.Field(i)
-	// 	if alias, ok := field.Tag.Lookup("name"); ok {
-	// 		if alias == "" {
-	// 			fmt.Println("(blank)")
-	// 		} else {
-	// 			fmt.Println(alias)
-	// 		}
-	// 	} else {
-	// 		fmt.Println("(not specified)")
-	// 	}
-	// }
 }
