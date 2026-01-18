@@ -10,18 +10,16 @@ type Arg struct {
 	Help string
 }
 
-type Flag struct {
-	Long  string
-	Short string
-	Val   string
-	Help  string
+// type constraint
+type Val interface {
+	string | bool
 }
 
-// there's got to be a way to generalize the val field to string|bool
-type FlagBool struct {
+// with generic Val field, instantiate like Flag[string]
+type Flag[V Val] struct {
 	Long  string
 	Short string
-	Val   bool
+	Val   V
 	Help  string
 }
 
