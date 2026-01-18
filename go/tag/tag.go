@@ -46,5 +46,5 @@ func ParseArgs(args []string) options {
 func Tag(args []string) {
 	fmt.Printf("args: %#v\n", args)
 	opts := ParseArgs(args)
-	fmt.Printf("opts: %#v\n", opts)
+	fmt.Println(opts)
 }
