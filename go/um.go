@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	nextpkg "github.com/brtholomy/um/go/next"
+	sortpkg "github.com/brtholomy/um/go/sort"
+	tagpkg "github.com/brtholomy/um/go/tag"
 )
 
 type Subcommand string
@@ -62,16 +66,20 @@ func main() {
 
 	switch cmd {
 	case next:
-		fmt.Printf("args: %#v\n", args)
+		nextpkg.Next(args)
+	case last:
+		nextpkg.Last()
 	case tag:
+		// TODO: move flag defs to the package?
 		tagFlags.Parse(prependFlagToArgs(args, query))
-		fmt.Println(tag)
+		tagpkg.Tag(args)
 		fmt.Printf("query: %#v\n", *tagQuery)
 		fmt.Printf("invert: %#v\n", *tagInvert)
 		fmt.Printf("args: %#v\n", tagFlags.Args())
 		tagFlags.Usage()
 	case sort:
 		sortFlags.Parse(args)
+		sortpkg.Sort(args)
 		fmt.Println("subcmd sort")
 		fmt.Printf("key: %#v\n", *sortKey)
 		fmt.Printf("args: %#v\n", sortFlags.Args())
