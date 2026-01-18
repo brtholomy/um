@@ -2,8 +2,10 @@ package flags
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
+	"text/tabwriter"
 )
 
 type Arg struct {
@@ -42,16 +44,19 @@ func Help(subcmd string, opts any) {
 	t := v.Type()
 
 	fmt.Printf("um %s usage:\n", subcmd)
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
+
 	for i := 0; i < v.NumField(); i++ {
 		field := t.Field(i)
 		value := v.Field(i)
 		switch value.Interface().(type) {
 		case Arg:
-			fmt.Printf("%-12v string\t: %v\n", "["+strings.ToLower(field.Name)+"]", value.FieldByName("Help"))
+			fmt.Fprintf(w, "[%v]\tstring\t%v\n", strings.ToLower(field.Name), value.FieldByName("Help"))
 		case Flag[string]:
-			fmt.Printf("%-12v | %v string\t: %v\n", value.FieldByName("Long"), value.FieldByName("Short"), value.FieldByName("Help"))
+			fmt.Fprintf(w, "%v | %v\tstring\t%v\n", value.FieldByName("Long"), value.FieldByName("Short"), value.FieldByName("Help"))
 		case Flag[bool]:
-			fmt.Printf("%-12v | %v bool\t: %v\n", value.FieldByName("Long"), value.FieldByName("Short"), value.FieldByName("Help"))
+			fmt.Fprintf(w, "%v | %v\tbool\t%v\n", value.FieldByName("Long"), value.FieldByName("Short"), value.FieldByName("Help"))
 		}
 	}
+	w.Flush()
 }

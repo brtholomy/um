@@ -41,7 +41,6 @@ func ParseArgs(args []string) options {
 }
 
 func Next(args []string) {
-	fmt.Println("next")
 	opts := ParseArgs(args)
 	fmt.Println(opts)
 }
