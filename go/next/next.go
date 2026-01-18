@@ -8,14 +8,16 @@ import (
 )
 
 type options struct {
-	descriptor flags.Arg
-	tags       flags.Arg
+	Descriptor flags.Arg
+	Tags       flags.Arg
+	Help       flags.Flag[bool]
 }
 
 func InitOpts() options {
 	return options{
 		flags.Arg{"", "midfix file descriptor"},
 		flags.Arg{"", "tags to add to new file"},
+		flags.Flag[bool]{"--help", "-h", false, "show help"},
 	}
 }
 
@@ -24,12 +26,15 @@ func ParseArgs(args []string) options {
 	for i, arg := range args {
 		switch {
 		case i == 0 && !flags.HasDashPrefix(arg):
-			opts.descriptor.Val = arg
+			opts.Descriptor.Val = arg
 		case i == 1 && !flags.HasDashPrefix(arg):
-			opts.tags.Val = arg
+			opts.Tags.Val = arg
 		case i >= 2:
 			fmt.Println("um next : too many args")
 			os.Exit(1)
+		case arg == opts.Help.Long || arg == opts.Help.Short:
+			flags.Help("next", opts)
+			return opts
 		}
 	}
 	return opts

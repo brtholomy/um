@@ -7,9 +7,10 @@ import (
 )
 
 type options struct {
-	query  flags.Arg
-	date   flags.Flag[string]
-	invert flags.Flag[bool]
+	Query  flags.Arg
+	Date   flags.Flag[string]
+	Invert flags.Flag[bool]
+	Help   flags.Flag[bool]
 }
 
 func InitOpts() options {
@@ -17,6 +18,7 @@ func InitOpts() options {
 		flags.Arg{"", "tag query"},
 		flags.Flag[string]{"--date", "-d", "", "date range"},
 		flags.Flag[bool]{"--invert", "-i", false, "invert match"},
+		flags.Flag[bool]{"--help", "-h", false, "show help"},
 	}
 }
 
@@ -26,25 +28,27 @@ func ParseArgs(args []string) options {
 		return opts
 	}
 	if !flags.HasDashPrefix(args[0]) {
-		opts.query.Val = args[0]
+		opts.Query.Val = args[0]
 	}
 	for i, arg := range args {
 		switch arg {
-		case opts.invert.Long, opts.invert.Short:
-			opts.invert.Val = true
-		case opts.date.Long, opts.date.Short:
+		case opts.Invert.Long, opts.Invert.Short:
+			opts.Invert.Val = true
+		case opts.Date.Long, opts.Date.Short:
 			if flags.MissingValueArg(args, i) {
 				flags.HelpMissingVal(arg)
 				break
 			}
-			opts.date.Val = args[i+1]
+			opts.Date.Val = args[i+1]
+		case opts.Help.Long, opts.Help.Short:
+			flags.Help("tag", opts)
+			return opts
 		}
 	}
 	return opts
 }
 
 func Tag(args []string) {
-	fmt.Printf("args: %#v\n", args)
 	opts := ParseArgs(args)
 	fmt.Println(opts)
 }
