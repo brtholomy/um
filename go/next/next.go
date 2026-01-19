@@ -13,7 +13,7 @@ type options struct {
 	Help       flags.Flag[bool]
 }
 
-func InitOpts() options {
+func initOpts() options {
 	return options{
 		flags.Arg{"", "midfix file descriptor"},
 		flags.Arg{"", "tags to add to new file"},
@@ -21,8 +21,8 @@ func InitOpts() options {
 	}
 }
 
-func ParseArgs(args []string) options {
-	opts := InitOpts()
+func parseArgs(args []string) options {
+	opts := initOpts()
 	for i, arg := range args {
 		switch {
 		case i == 0 && !flags.HasDashPrefix(arg):
@@ -41,6 +41,6 @@ func ParseArgs(args []string) options {
 }
 
 func Next(args []string) {
-	opts := ParseArgs(args)
+	opts := parseArgs(args)
 	fmt.Println(opts)
 }

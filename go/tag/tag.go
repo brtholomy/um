@@ -13,7 +13,7 @@ type options struct {
 	Help   flags.Flag[bool]
 }
 
-func InitOpts() options {
+func initOpts() options {
 	return options{
 		flags.Arg{"", "tag query"},
 		flags.Flag[string]{"--date", "-d", "", "date range"},
@@ -22,8 +22,8 @@ func InitOpts() options {
 	}
 }
 
-func ParseArgs(args []string) options {
-	opts := InitOpts()
+func parseArgs(args []string) options {
+	opts := initOpts()
 	for i, arg := range args {
 		switch {
 		case i == 0 && !flags.HasDashPrefix(arg):
@@ -45,6 +45,6 @@ func ParseArgs(args []string) options {
 }
 
 func Tag(args []string) {
-	opts := ParseArgs(args)
+	opts := parseArgs(args)
 	fmt.Println(opts)
 }

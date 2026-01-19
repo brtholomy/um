@@ -19,7 +19,9 @@ type Val interface {
 }
 
 // with generic Val field, instantiate like Flag[string]
-// TODO: probably struct inheritance would be cleaner, but Flag[bool] is cooler than FlagBool.
+// NOTE: struct inheritance would be easier, but Flag[bool] is much cooler than FlagBool.
+// and actually more readable for the initOpts function, which serves as documentation.
+// so the complexity seems to be all paid up front here in this pkg.
 type Flag[T Val] struct {
 	Long  string
 	Short string
