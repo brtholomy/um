@@ -33,7 +33,7 @@ func parseArgs(args []string) options {
 		case i == 1 && !flags.HasDashPrefix(arg):
 			opts.Tags.Val = arg
 		case i >= 2:
-			log.Println("um next: too many args")
+			log.Printf("um next: too many args: %s", args)
 			flags.Help("next", opts)
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("next", opts)

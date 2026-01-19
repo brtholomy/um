@@ -33,7 +33,7 @@ func parseArgs(args []string) options {
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("sort", opts)
 		default:
-			log.Println("um sort: invalid argument")
+			log.Printf("um sort: invalid argument: %s", arg)
 			flags.Help("sort", opts)
 		}
 	}

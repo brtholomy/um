@@ -37,7 +37,7 @@ func parseArgs(args []string) options {
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("tag", opts)
 		default:
-			log.Println("um tag: invalid argument")
+			log.Printf("um tag: invalid argument: %s", arg)
 			flags.Help("tag", opts)
 		}
 	}
