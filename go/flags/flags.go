@@ -19,11 +19,27 @@ type Val interface {
 }
 
 // with generic Val field, instantiate like Flag[string]
-type Flag[V Val] struct {
+// TODO: probably struct inheritance would be cleaner, but Flag[bool] is cooler than FlagBool.
+type Flag[T Val] struct {
 	Long  string
 	Short string
-	Val   V
+	Val   T
 	Help  string
+}
+
+// generic Flag validity check
+// NOTE: you cannot define a method on an instantiated type, only the generic
+// https://www.reddit.com/r/golang/comments/1n6xasx/comment/nc3dbhd/
+func (f Flag[Val]) IsSet() bool {
+	// must do this weird dance: convert to empty interface, then cast:
+	switch any(f.Val).(type) {
+	case string:
+		return any(f.Val).(string) != ""
+	case bool:
+		return any(f.Val).(bool)
+	default:
+		return false
+	}
 }
 
 func HasDashPrefix(s string) bool {
