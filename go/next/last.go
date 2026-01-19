@@ -1,8 +1,10 @@
 package next
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -21,13 +23,19 @@ var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
 func last() (string, error) {
 	// NOTE: globbing requires invoking the shell as cmd:
 	cmd := exec.Command("sh", "-c", LS_CMD)
-	ls, err := cmd.Output()
-	if err != nil {
-		return "", err
+
+	// fine grained control:
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	// the returned err is ExitStatus, which has stderr embedded, but i find this clearer:
+	if err := cmd.Run(); err != nil {
+		return "", errors.New(stderr.String())
 	}
-	lines := strings.Split(string(ls), "\n")
+
+	lines := strings.Split(stdout.String(), "\n")
 	if len(lines) == 0 {
-		return "", errors.New("no um files in current dir")
+		return "", errors.New("um files not found")
 	}
 	return lines[0], nil
 }
@@ -35,7 +43,8 @@ func last() (string, error) {
 func Last() {
 	s, err := last()
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
+		fmt.Printf("um last: %v", err)
+		os.Exit(1)
 	}
 	fmt.Println(s)
 }
