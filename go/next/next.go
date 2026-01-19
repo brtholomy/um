@@ -3,6 +3,7 @@ package next
 import (
 	"errors"
 	"fmt"
+	"os/exec"
 	"strconv"
 
 	"github.com/brtholomy/um/go/flags"
@@ -69,15 +70,53 @@ func next(last string, desc string) (string, error) {
 	return n, nil
 }
 
+// TODO: if i decide to move the file creation logic here.
+func emacsDate() (string, error) {
+	cmd := exec.Command("emacsclient", "--eval", "(format-time-string um-date-format)")
+	date, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+	return string(date), nil
+}
+
+// calls (um-next) inside a running emacs server. which has the advantage of fetching the loaded
+// value of um-date-format, and respecting any other loaded configuration we might add.
+//
+// other options would be to forego respecting Elisp config values, or loading from a common config
+// file and forcing emacs to load from there - which would be very un-Emacs. But as the file loading
+// assumes a running server anyway, might as well get the current values.
+//
+// this is the point at which this design becomes weird. But I don't want to let Elisp suck this CLI
+// into its nasty grip. Go is far superior in this application and there's no way I'm writing the
+// `um tag` logic in Elisp.
+//
+// So I've got Go and and an ancient beloved Lisp machine trying to live together.
+func emacsNext(f string, tags string) error {
+	quotedargs := fmt.Sprintf(`"%s"`, f)
+	if tags != "" {
+		quotedargs = fmt.Sprintf(`%s "%s"`, quotedargs, tags)
+	}
+	fn := fmt.Sprintf(`(um-next %s)`, quotedargs)
+	out, err := exec.Command("emacsclient", "--eval", fn).Output()
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(out))
+	return nil
+}
+
 func Next(args []string) {
 	opts := parseArgs(args)
 	l, err := last()
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 	}
-	n, err := next(l, opts.Descriptor.Val)
+	filename, err := next(l, opts.Descriptor.Val)
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 	}
-	fmt.Println(n)
+	if err := emacsNext(filename, opts.Tags.Val); err != nil {
+		fmt.Printf("err: %v\n", err)
+	}
 }
