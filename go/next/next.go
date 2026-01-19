@@ -40,22 +40,18 @@ func parseArgs(args []string) options {
 	return opts
 }
 
-func parseFile(last string) (string, string, error) {
+func parseFile(last string) (string, error) {
 	res := fileRegexp.FindStringSubmatch(last)
 	num := ""
-	desc := ""
 	if len(res) < 2 {
-		return num, desc, errors.New("no um files in current dir")
+		return num, errors.New("no um files in current dir")
 	}
 	num = res[1]
-	if len(res) > 2 {
-		desc = res[2]
-	}
-	return num, desc, nil
+	return num, nil
 }
 
-func next(last string) (string, error) {
-	num, desc, err := parseFile(last)
+func next(last string, desc string) (string, error) {
+	num, err := parseFile(last)
 	if err != nil {
 		return "", err
 	}
@@ -67,6 +63,7 @@ func next(last string) (string, error) {
 		desc = desc + "."
 	}
 	width := len(num)
+	// whaddya doin bro wahh
 	fmtstr := fmt.Sprintf("%%0%dd.%%smd", width)
 	n := fmt.Sprintf(fmtstr, i+1, desc)
 	return n, nil
@@ -74,13 +71,11 @@ func next(last string) (string, error) {
 
 func Next(args []string) {
 	opts := parseArgs(args)
-	fmt.Println(opts)
-
 	l, err := last()
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 	}
-	n, err := next(l)
+	n, err := next(l, opts.Descriptor.Val)
 	if err != nil {
 		fmt.Printf("err: %v\n", err)
 	}

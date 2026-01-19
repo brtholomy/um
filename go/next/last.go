@@ -9,9 +9,8 @@ import (
 )
 
 const (
-	LS_CMD       = `ls -r [0-9]*.md`
-	LS_GREP_PIPE = `ls -r | grep -E '^[[:digit:]].*\.md'`
-	FILE_REGEXP  = `(?m)^([0-9]+)\.([[:alpha:]]*)\.*md$`
+	LS_CMD      = `ls -r [0-9]*.md`
+	FILE_REGEXP = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
 )
 
 var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
