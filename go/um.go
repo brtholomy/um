@@ -17,9 +17,18 @@ const (
 	next Subcommand = "next"
 	last Subcommand = "last"
 	sort Subcommand = "sort"
+	help Subcommand = "help"
 )
 
-var help string = fmt.Sprintf("um [%s | %s | %s | %s] [--help | -h]", tag, next, last, sort)
+var helpShort string = fmt.Sprintf("um [%s | %s | %s | %s | %s]", tag, next, last, sort, help)
+var helpLong string = fmt.Sprintf(`%s
+
+An (U)ltralight database for (M)arkdown composition.
+
+Each subcommand has a --help | -h flag.
+
+https://github.com/brtholomy/um
+`, helpShort)
 
 func main() {
 	// NOTE: no prefix at all so that I can use log.Fatalf
@@ -28,7 +37,7 @@ func main() {
 	// TODO: do something useful:
 	// run empty tag query?
 	if len(os.Args) < 2 {
-		log.Fatalln(help)
+		log.Fatalln(helpShort)
 	}
 
 	cmd := Subcommand(os.Args[1])
@@ -43,8 +52,10 @@ func main() {
 		tagpkg.Tag(args)
 	case sort:
 		sortpkg.Sort(args)
+	case help:
+		log.Fatalln(helpLong)
 	default:
 		log.Println("um: command not found")
-		log.Fatalln(help)
+		log.Fatalln(helpShort)
 	}
 }
