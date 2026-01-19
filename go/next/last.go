@@ -9,12 +9,15 @@ import (
 )
 
 const (
-	LS_CMD      = `ls -r [0-9]*.md`
+	// NOTE: the -r flag:
+	LS_CMD = `ls -r [0-9]*.md`
+	// we only care about the number group:
 	FILE_REGEXP = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
 )
 
 var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
 
+// calls ls to get the lexical last file
 func last() (string, error) {
 	// NOTE: globbing requires invoking the shell as cmd:
 	cmd := exec.Command("sh", "-c", LS_CMD)

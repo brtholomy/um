@@ -41,7 +41,9 @@ func parseArgs(args []string) options {
 	return opts
 }
 
-func parseFile(last string) (string, error) {
+// takes the complete last file string
+// returns the number as string
+func numFromLast(last string) (string, error) {
 	res := fileRegexp.FindStringSubmatch(last)
 	num := ""
 	if len(res) < 2 {
@@ -51,8 +53,10 @@ func parseFile(last string) (string, error) {
 	return num, nil
 }
 
+// takes the complete last file string and new descriptor
+// returns the complete next file string
 func next(last string, desc string) (string, error) {
-	num, err := parseFile(last)
+	num, err := numFromLast(last)
 	if err != nil {
 		return "", err
 	}
