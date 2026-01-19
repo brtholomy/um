@@ -97,6 +97,8 @@ func emacsNext(f string, tags string) error {
 	if err != nil {
 		return err
 	}
+	// NOTE: sends to stderr : is this what we want?
+	// if we decide to pipe the filename out, yes.
 	log.Print(string(out))
 	return nil
 }

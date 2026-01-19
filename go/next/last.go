@@ -3,6 +3,7 @@ package next
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"os/exec"
 	"regexp"
@@ -45,5 +46,6 @@ func Last() {
 	if err != nil {
 		log.Fatalf("um last: %v", err)
 	}
-	log.Println(s)
+	// send to stdout, not stderr as is default for log.Print:
+	fmt.Println(s)
 }

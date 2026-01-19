@@ -116,6 +116,7 @@ func Sort(args []string) {
 	if opts.Write.Val {
 		Write(opts.Key.Val, out)
 	} else {
+		// to stdout
 		fmt.Print(out)
 	}
 }
