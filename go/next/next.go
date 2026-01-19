@@ -1,7 +1,9 @@
 package next
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/brtholomy/um/go/flags"
 )
@@ -38,7 +40,49 @@ func parseArgs(args []string) options {
 	return opts
 }
 
+func parseFile(last string) (string, string, error) {
+	res := fileRegexp.FindStringSubmatch(last)
+	num := ""
+	desc := ""
+	if len(res) < 2 {
+		return num, desc, errors.New("no um files in current dir")
+	}
+	num = res[1]
+	if len(res) > 2 {
+		desc = res[2]
+	}
+	return num, desc, nil
+}
+
+func next(last string) (string, error) {
+	num, desc, err := parseFile(last)
+	if err != nil {
+		return "", err
+	}
+	i, err := strconv.Atoi(num)
+	if err != nil {
+		return "", err
+	}
+	if desc != "" {
+		desc = desc + "."
+	}
+	width := len(num)
+	fmtstr := fmt.Sprintf("%%0%dd.%%smd", width)
+	n := fmt.Sprintf(fmtstr, i+1, desc)
+	return n, nil
+}
+
 func Next(args []string) {
 	opts := parseArgs(args)
 	fmt.Println(opts)
+
+	l, err := last()
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	}
+	n, err := next(l)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+	}
+	fmt.Println(n)
 }
