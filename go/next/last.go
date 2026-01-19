@@ -3,8 +3,7 @@ package next
 import (
 	"bytes"
 	"errors"
-	"fmt"
-	"os"
+	"log"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -14,7 +13,8 @@ const (
 	// NOTE: the -r flag:
 	LS_CMD = `ls -r [0-9]*.md`
 	// we only care about the number group:
-	FILE_REGEXP = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
+	FILE_REGEXP   = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
+	NOT_FOUND_MSG = "um files not found"
 )
 
 var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
@@ -35,7 +35,7 @@ func last() (string, error) {
 
 	lines := strings.Split(stdout.String(), "\n")
 	if len(lines) == 0 {
-		return "", errors.New("um files not found")
+		return "", errors.New(NOT_FOUND_MSG)
 	}
 	return lines[0], nil
 }
@@ -43,8 +43,7 @@ func last() (string, error) {
 func Last() {
 	s, err := last()
 	if err != nil {
-		fmt.Printf("um last: %v", err)
-		os.Exit(1)
+		log.Fatalf("um last: %v", err)
 	}
-	fmt.Println(s)
+	log.Println(s)
 }

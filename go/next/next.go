@@ -3,6 +3,7 @@ package next
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"strconv"
 
@@ -32,7 +33,7 @@ func parseArgs(args []string) options {
 		case i == 1 && !flags.HasDashPrefix(arg):
 			opts.Tags.Val = arg
 		case i >= 2:
-			fmt.Println("um next : too many args")
+			log.Println("um next: too many args")
 			flags.Help("next", opts)
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("next", opts)
@@ -47,7 +48,7 @@ func numFromLast(last string) (string, error) {
 	res := fileRegexp.FindStringSubmatch(last)
 	num := ""
 	if len(res) < 2 {
-		return num, errors.New("no um files in current dir")
+		return num, errors.New(NOT_FOUND_MSG)
 	}
 	num = res[1]
 	return num, nil
@@ -92,11 +93,11 @@ func emacsNext(f string, tags string) error {
 		quotedargs = fmt.Sprintf(`%s "%s"`, quotedargs, tags)
 	}
 	fn := fmt.Sprintf(`(um-next %s)`, quotedargs)
-	out, err := exec.Command("emacsclient", "--eval", fn).Output()
+	out, err := exec.Command("emacsclient", "--eval", fn).CombinedOutput()
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(out))
+	log.Print(string(out))
 	return nil
 }
 
@@ -104,13 +105,13 @@ func Next(args []string) {
 	opts := parseArgs(args)
 	l, err := last()
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
+		log.Fatalf("um next: %v", err)
 	}
 	filename, err := next(l, opts.Descriptor.Val)
 	if err != nil {
-		fmt.Printf("err: %v\n", err)
+		log.Fatalf("um next: %v", err)
 	}
 	if err := emacsNext(filename, opts.Tags.Val); err != nil {
-		fmt.Printf("err: %v\n", err)
+		log.Fatalf("um next: %v", err)
 	}
 }

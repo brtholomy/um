@@ -1,7 +1,7 @@
 package tag
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/brtholomy/um/go/flags"
 )
@@ -37,7 +37,7 @@ func parseArgs(args []string) options {
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("tag", opts)
 		default:
-			fmt.Println("invalid argument")
+			log.Println("um tag: invalid argument")
 			flags.Help("tag", opts)
 		}
 	}
@@ -46,5 +46,5 @@ func parseArgs(args []string) options {
 
 func Tag(args []string) {
 	opts := parseArgs(args)
-	fmt.Println(opts)
+	log.Println(opts)
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	nextpkg "github.com/brtholomy/um/go/next"
@@ -21,11 +22,13 @@ const (
 var help string = fmt.Sprintf("um [%s | %s | %s | %s] [--help | -h]", tag, next, last, sort)
 
 func main() {
+	// NOTE: no prefix at all so that I can use log.Fatalf
+	log.SetFlags(0)
+
 	// TODO: do something useful:
 	// run empty tag query?
 	if len(os.Args) < 2 {
-		fmt.Println(help)
-		os.Exit(1)
+		log.Fatalln(help)
 	}
 
 	cmd := Subcommand(os.Args[1])
@@ -41,8 +44,7 @@ func main() {
 	case sort:
 		sortpkg.Sort(args)
 	default:
-		fmt.Println("command not found")
-		fmt.Println(help)
-		os.Exit(1)
+		log.Println("um: command not found")
+		log.Fatalln(help)
 	}
 }

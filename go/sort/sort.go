@@ -1,7 +1,7 @@
 package sort
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/brtholomy/um/go/flags"
 )
@@ -33,7 +33,7 @@ func parseArgs(args []string) options {
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("sort", opts)
 		default:
-			fmt.Println("invalid argument")
+			log.Println("um sort: invalid argument")
 			flags.Help("sort", opts)
 		}
 	}
@@ -42,5 +42,5 @@ func parseArgs(args []string) options {
 
 func Sort(args []string) {
 	opts := parseArgs(args)
-	fmt.Println(opts)
+	log.Println(opts)
 }

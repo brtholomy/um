@@ -2,6 +2,7 @@ package flags
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -59,8 +60,8 @@ func MissingValue(args []string, i int) bool {
 // if no value ahead in the args, print error and exit
 func ValidValueOrExit(args []string, i int) {
 	if MissingValue(args, i) {
-		fmt.Printf("%s needs a value assignment\n", args[i])
-		os.Exit(1)
+		log.Printf("um: %s needs a value assignment\n", args[i])
+		log.Fatal("try: um [cmd] --help")
 	}
 }
 
@@ -92,7 +93,7 @@ func Help(subcmd string, opts any) {
 			)
 		}
 	}
-	fmt.Printf("um %s%s\n", subcmd, positional)
+	log.Printf("um %s%s\n", subcmd, positional)
 	w.Flush()
 	os.Exit(0)
 }
