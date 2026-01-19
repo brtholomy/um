@@ -1,8 +1,6 @@
 package sort
 
 import (
-	"fmt"
-
 	"github.com/brtholomy/um/go/flags"
 )
 
@@ -45,6 +43,5 @@ func parseArgs(args []string) options {
 }
 
 func Sort(args []string) {
-	opts := parseArgs(args)
-	fmt.Println(opts)
+	_ = parseArgs(args)
 }

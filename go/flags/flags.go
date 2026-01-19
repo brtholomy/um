@@ -71,14 +71,16 @@ func Help(subcmd string, opts any) {
 		case Arg:
 			positional += fmt.Sprintf(" [%s]", strings.ToLower(field.Name))
 			fmt.Fprintf(w, "[%v]\tstring\t%v\n", strings.ToLower(field.Name), value.FieldByName("Help"))
-		case Flag[string]:
-			positional += fmt.Sprintf(" [%s]", value.FieldByName("Long"))
-			fmt.Fprintf(w, "%v | %v\tstring\t%v\n", value.FieldByName("Long"), value.FieldByName("Short"), value.FieldByName("Help"))
-		case Flag[bool]:
+		case Flag[string], Flag[bool]:
 			if field.Name != "Help" {
 				positional += fmt.Sprintf(" [%s]", value.FieldByName("Long"))
 			}
-			fmt.Fprintf(w, "%v | %v\tbool\t%v\n", value.FieldByName("Long"), value.FieldByName("Short"), value.FieldByName("Help"))
+			fmt.Fprintf(w, "%v | %v\t%v\t%v\n",
+				value.FieldByName("Long"),
+				value.FieldByName("Short"),
+				value.FieldByName("Val").Type(),
+				value.FieldByName("Help"),
+			)
 		}
 	}
 	fmt.Printf("um %s%s\n", subcmd, positional)
