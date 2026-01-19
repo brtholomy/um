@@ -44,6 +44,10 @@ func (f Flag[Val]) IsSet() bool {
 	}
 }
 
+func (f Arg) IsSet() bool {
+	return f.Val != ""
+}
+
 func HasDashPrefix(s string) bool {
 	return strings.HasPrefix(s, "-")
 }
