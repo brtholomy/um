@@ -70,16 +70,6 @@ func next(last string, desc string) (string, error) {
 	return n, nil
 }
 
-// TODO: if i decide to move the file creation logic here.
-func emacsDate() (string, error) {
-	cmd := exec.Command("emacsclient", "--eval", "(format-time-string um-date-format)")
-	date, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-	return string(date), nil
-}
-
 // calls (um-next) inside a running emacs server. which has the advantage of fetching the loaded
 // value of um-date-format, and respecting any other loaded configuration we might add.
 //
