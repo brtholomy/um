@@ -52,15 +52,20 @@ func HasDashPrefix(s string) bool {
 	return strings.HasPrefix(s, "-")
 }
 
-func MissingValueArg(args []string, i int) bool {
+func MissingValue(args []string, i int) bool {
 	return i+1 == len(args) || HasDashPrefix(args[i+1])
 }
 
-func HelpMissingVal(flag string) {
-	fmt.Printf("%s needs a value assignment\n", flag)
+// if no value ahead in the args, print error and exit
+func ValidValueOrExit(args []string, i int) {
+	if MissingValue(args, i) {
+		fmt.Printf("%s needs a value assignment\n", args[i])
+		os.Exit(1)
+	}
 }
 
 // print out help string by reflecting over fields of provided opts struct
+// and os.Exit(0)
 func Help(subcmd string, opts any) {
 	v := reflect.ValueOf(opts)
 	t := v.Type()
@@ -89,4 +94,5 @@ func Help(subcmd string, opts any) {
 	}
 	fmt.Printf("um %s%s\n", subcmd, positional)
 	w.Flush()
+	os.Exit(0)
 }

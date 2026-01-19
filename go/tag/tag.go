@@ -1,6 +1,8 @@
 package tag
 
 import (
+	"fmt"
+
 	"github.com/brtholomy/um/go/flags"
 )
 
@@ -29,19 +31,20 @@ func parseArgs(args []string) options {
 		case arg == opts.Invert.Long || arg == opts.Invert.Short:
 			opts.Invert.Val = true
 		case arg == opts.Date.Long || arg == opts.Date.Short:
-			if flags.MissingValueArg(args, i) {
-				flags.HelpMissingVal(arg)
-				break
-			}
+			// TODO: should we use reflection here for a general Valid(arg, opts.Field)?
+			flags.ValidValueOrExit(args, i)
 			opts.Date.Val = args[i+1]
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("tag", opts)
-			return opts
+		default:
+			fmt.Println("invalid argument")
+			flags.Help("tag", opts)
 		}
 	}
 	return opts
 }
 
 func Tag(args []string) {
-	_ = parseArgs(args)
+	opts := parseArgs(args)
+	fmt.Println(opts)
 }

@@ -2,7 +2,6 @@ package next
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/brtholomy/um/go/flags"
 )
@@ -31,15 +30,15 @@ func parseArgs(args []string) options {
 			opts.Tags.Val = arg
 		case i >= 2:
 			fmt.Println("um next : too many args")
-			os.Exit(1)
+			flags.Help("next", opts)
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("next", opts)
-			return opts
 		}
 	}
 	return opts
 }
 
 func Next(args []string) {
-	_ = parseArgs(args)
+	opts := parseArgs(args)
+	fmt.Println(opts)
 }

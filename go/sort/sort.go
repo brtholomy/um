@@ -1,6 +1,8 @@
 package sort
 
 import (
+	"fmt"
+
 	"github.com/brtholomy/um/go/flags"
 )
 
@@ -23,25 +25,22 @@ func parseArgs(args []string) options {
 	for i, arg := range args {
 		switch {
 		case arg == opts.Source.Long || arg == opts.Source.Short:
-			if flags.MissingValueArg(args, i) {
-				flags.HelpMissingVal(arg)
-				break
-			}
+			flags.ValidValueOrExit(args, i)
 			opts.Source.Val = args[i+1]
 		case arg == opts.Key.Long || arg == opts.Key.Short:
-			if flags.MissingValueArg(args, i) {
-				flags.HelpMissingVal(arg)
-				break
-			}
+			flags.ValidValueOrExit(args, i)
 			opts.Key.Val = args[i+1]
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("sort", opts)
-			return opts
+		default:
+			fmt.Println("invalid argument")
+			flags.Help("sort", opts)
 		}
 	}
 	return opts
 }
 
 func Sort(args []string) {
-	_ = parseArgs(args)
+	opts := parseArgs(args)
+	fmt.Println(opts)
 }

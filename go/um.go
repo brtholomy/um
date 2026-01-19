@@ -18,7 +18,7 @@ const (
 	sort Subcommand = "sort"
 )
 
-var help string = fmt.Sprintf("um [%s | %s | %s | %s]", tag, next, last, sort)
+var help string = fmt.Sprintf("um [%s | %s | %s | %s] [--help | -h]", tag, next, last, sort)
 
 func main() {
 	// TODO: do something useful:
@@ -41,6 +41,7 @@ func main() {
 	case sort:
 		sortpkg.Sort(args)
 	default:
+		fmt.Println("command not found")
 		fmt.Println(help)
 		os.Exit(1)
 	}
