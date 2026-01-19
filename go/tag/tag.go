@@ -32,9 +32,7 @@ func parseArgs(args []string) options {
 		case arg == opts.Invert.Long || arg == opts.Invert.Short:
 			opts.Invert.Val = true
 		case arg == opts.Date.Long || arg == opts.Date.Short:
-			flags.ValidValueOrExit(args, i)
-			opts.Date.Val = args[i+1]
-			i++
+			i, opts.Date.Val = flags.ValidateIncrementFetchOrExit(args, i)
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("tag", opts)
 		default:

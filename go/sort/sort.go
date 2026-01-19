@@ -34,13 +34,9 @@ func parseArgs(args []string) options {
 		arg := args[i]
 		switch {
 		case arg == opts.Source.Long || arg == opts.Source.Short:
-			flags.ValidValueOrExit(args, i)
-			opts.Source.Val = args[i+1]
-			i++
+			i, opts.Source.Val = flags.ValidateIncrementFetchOrExit(args, i)
 		case arg == opts.Key.Long || arg == opts.Key.Short:
-			flags.ValidValueOrExit(args, i)
-			opts.Key.Val = args[i+1]
-			i++
+			i, opts.Key.Val = flags.ValidateIncrementFetchOrExit(args, i)
 		case arg == opts.Write.Long || arg == opts.Write.Short:
 			opts.Write.Val = true
 		case arg == opts.Help.Long || arg == opts.Help.Short:

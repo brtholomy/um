@@ -53,16 +53,25 @@ func HasDashPrefix(s string) bool {
 	return strings.HasPrefix(s, "-")
 }
 
-func MissingValue(args []string, i int) bool {
+// check for non-dashed value ahead in the args slice
+func missingValue(args []string, i int) bool {
 	return i+1 == len(args) || HasDashPrefix(args[i+1])
 }
 
 // if no value ahead in the args, print error and exit
-func ValidValueOrExit(args []string, i int) {
-	if MissingValue(args, i) {
+func validValueOrExit(args []string, i int) {
+	if missingValue(args, i) {
 		log.Printf("um: %s needs a value assignment\n", args[i])
 		log.Fatal("try: um [cmd] --help")
 	}
+}
+
+// 1. validate a Flag[string] by looking ahead in args, if missing, os.Exit(1)
+// 2. increment the i to skip that value and return
+// 3. fetch that value and return
+func ValidateIncrementFetchOrExit(args []string, i int) (int, string) {
+	validValueOrExit(args, i)
+	return i + 1, args[i+1]
 }
 
 // print out help string by reflecting over fields of provided opts struct
