@@ -24,16 +24,17 @@ func initOpts() options {
 
 func parseArgs(args []string) options {
 	opts := initOpts()
-	for i, arg := range args {
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
 		switch {
 		case i == 0 && !flags.HasDashPrefix(arg):
 			opts.Query.Val = arg
 		case arg == opts.Invert.Long || arg == opts.Invert.Short:
 			opts.Invert.Val = true
 		case arg == opts.Date.Long || arg == opts.Date.Short:
-			// TODO: should we use reflection here for a general Valid(arg, opts.Field)?
 			flags.ValidValueOrExit(args, i)
 			opts.Date.Val = args[i+1]
+			i++
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help("tag", opts)
 		default:
