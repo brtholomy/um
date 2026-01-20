@@ -51,7 +51,8 @@ func parseArgs(args []string) options {
 	return opts
 }
 
-func tag(opts options) {
+func Tag(args []string) {
+	opts := parseArgs(args)
 	queries := parseQuery(opts.Query.Val)
 	entries := entriesGlobOrStdin()
 
@@ -70,9 +71,4 @@ func tag(opts options) {
 	adjacencies := reduceAdjacencies(makeAdjacencies(entries, files), queries, opts.Invert.Val)
 
 	printFiles(os.Stdout, entries, tagmap, files, adjacencies, queries, opts.Verbose.Val)
-}
-
-func Tag(args []string) {
-	opts := parseArgs(args)
-	tag(opts)
 }
