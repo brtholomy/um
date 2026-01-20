@@ -57,14 +57,14 @@ func Tag(args []string) {
 	entries := entriesGlobOrStdin()
 
 	// we shrink the entries list immediately if we want a date range:
-	if opts.Date.Val != "" {
+	if opts.Date.IsSet() {
 		entries = dateRange(entries, opts.Date.Val)
 	}
 	tagmap := makeTagmap(entries)
 
 	// processQueries must precede invert because we want invert to respect combined tags:
 	files := processQueries(tagmap, queries)
-	if opts.Invert.Val {
+	if opts.Invert.IsSet() {
 		files = invert(entries, files)
 	}
 	// NOTE: the full makeAdjacencies map may one day be useful on its own
