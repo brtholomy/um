@@ -16,6 +16,7 @@ import (
 
 	cmdpkg "github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
+	"github.com/brtholomy/um/go/pipe"
 )
 
 // just so that copied calls into flags.Help don't have to be adjusted between files:
@@ -141,27 +142,9 @@ func (s Set) Intersect(t Set) {
 	}
 }
 
-func isStdinLoaded() bool {
-	stat, _ := os.Stdin.Stat()
-	return (stat.Mode() & os.ModeCharDevice) == 0
-}
-
-func GetStdin() ([]string, error) {
-	if !isStdinLoaded() {
-		return nil, errors.New("stdin not loaded")
-	}
-	data, err := io.ReadAll(os.Stdin)
-	if err != nil {
-		log.Fatal(err)
-	}
-	// TODO: there's got to be a better way:
-	s, _ := strings.CutSuffix(string(data), "\n")
-	return strings.Split(s, "\n"), nil
-}
-
 // reads files from stdin if present, otherwise from the glob pattern:
 func Filelist(glob string) []string {
-	filelist, err := GetStdin()
+	filelist, err := pipe.GetStdin()
 	// otherwise get from the glob:
 	if err != nil {
 		filelist, err = filepath.Glob(glob)
