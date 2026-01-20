@@ -29,7 +29,6 @@ func initOpts() options {
 
 func parseArgs(args []string) options {
 	opts := initOpts()
-
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		switch {

@@ -32,10 +32,10 @@ func parseArgs(args []string) options {
 			opts.Descriptor.Val = arg
 		case i == 1 && !flags.HasDashPrefix(arg):
 			opts.Tags.Val = arg
-		case i >= 2:
-			log.Printf("um next: too many args: %s", args)
-			flags.Help("next", opts)
 		case arg == opts.Help.Long || arg == opts.Help.Short:
+			flags.Help("next", opts)
+		default:
+			log.Printf("um next: invalid argument: %s", arg)
 			flags.Help("next", opts)
 		}
 	}
