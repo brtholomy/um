@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+// but this stinks:
+const lcmd = "last"
+
 const (
 	// NOTE: the -r flag:
 	LS_CMD = `ls -r [0-9]*.md`
@@ -44,7 +47,7 @@ func last() (string, error) {
 func Last() {
 	s, err := last()
 	if err != nil {
-		log.Fatalf("um last: %v", err)
+		log.Fatalf("um %s: %v", lcmd, err)
 	}
 	// send to stdout, not stderr as is default for log.Print:
 	fmt.Println(s)

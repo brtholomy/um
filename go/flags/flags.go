@@ -74,6 +74,14 @@ func ValidateIncrementFetchOrExit(args []string, i int) (int, string) {
 	return i + 1, args[i+1]
 }
 
+func HelpRequired(cmd string, long string) {
+	log.Printf("um %s: %s is required", cmd, long)
+}
+
+func HelpInvalidArg(cmd string, arg string) {
+	log.Printf("um %s: invalid argument: %s", cmd, arg)
+}
+
 // print out help string by reflecting over fields of provided opts struct
 // and os.Exit(0)
 func Help(subcmd string, opts any) {

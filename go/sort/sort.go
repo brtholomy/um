@@ -11,6 +11,8 @@ import (
 	"github.com/brtholomy/um/go/pipe"
 )
 
+const cmd = "sort"
+
 type options struct {
 	Source flags.Flag[string]
 	Key    flags.Flag[string]
@@ -39,15 +41,15 @@ func parseArgs(args []string) options {
 		case arg == opts.Write.Long || arg == opts.Write.Short:
 			opts.Write.Val = true
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help("sort", opts)
+			flags.Help(cmd, opts)
 		default:
 			log.Printf("um sort: invalid argument: %s", arg)
-			flags.Help("sort", opts)
+			flags.Help(cmd, opts)
 		}
 	}
 	if !opts.Key.IsSet() {
-		log.Printf("um sort: %s is required", opts.Key.Long)
-		flags.Help("sort", opts)
+		flags.HelpRequired(cmd, opts.Key.Long)
+		flags.Help(cmd, opts)
 	}
 	return opts
 }

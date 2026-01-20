@@ -6,6 +6,8 @@ import (
 	"github.com/brtholomy/um/go/flags"
 )
 
+const cmd = "tag"
+
 type options struct {
 	Query   flags.Arg
 	Date    flags.Flag[string]
@@ -38,10 +40,10 @@ func parseArgs(args []string) options {
 		case arg == opts.Date.Long || arg == opts.Date.Short:
 			i, opts.Date.Val = flags.ValidateIncrementFetchOrExit(args, i)
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help("tag", opts)
+			flags.Help(cmd, opts)
 		default:
-			log.Printf("um tag: invalid argument: %s", arg)
-			flags.Help("tag", opts)
+			flags.HelpInvalidArg(cmd, arg)
+			flags.Help(cmd, opts)
 		}
 	}
 	return opts
