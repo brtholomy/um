@@ -7,11 +7,12 @@ import (
 	"slices"
 	"strings"
 
+	cmdpkg "github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
 	"github.com/brtholomy/um/go/pipe"
 )
 
-const cmd = "sort"
+const cmd = cmdpkg.Sort
 
 type options struct {
 	Source flags.Flag[string]
@@ -43,7 +44,7 @@ func parseArgs(args []string) options {
 		case arg == opts.Help.Long || arg == opts.Help.Short:
 			flags.Help(cmd, opts)
 		default:
-			log.Printf("um sort: invalid argument: %s", arg)
+			flags.HelpInvalidArg(cmd, arg)
 			flags.Help(cmd, opts)
 		}
 	}

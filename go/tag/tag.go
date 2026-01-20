@@ -3,10 +3,12 @@ package tag
 import (
 	"log"
 
+	cmdpkg "github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
 )
 
-const cmd = "tag"
+// just so that copied calls into flags.Help don't have to be adjusted between files:
+const cmd = cmdpkg.Tag
 
 type options struct {
 	Query   flags.Arg

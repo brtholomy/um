@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strings"
 	"text/tabwriter"
+
+	"github.com/brtholomy/um/go/cmd"
 )
 
 type Arg struct {
@@ -74,17 +76,17 @@ func ValidateIncrementFetchOrExit(args []string, i int) (int, string) {
 	return i + 1, args[i+1]
 }
 
-func HelpRequired(cmd string, long string) {
-	log.Printf("um %s: %s is required", cmd, long)
+func HelpRequired(sub cmd.Subcommand, long string) {
+	log.Printf("um %s: %s is required", sub, long)
 }
 
-func HelpInvalidArg(cmd string, arg string) {
-	log.Printf("um %s: invalid argument: %s", cmd, arg)
+func HelpInvalidArg(sub cmd.Subcommand, arg string) {
+	log.Printf("um %s: invalid argument: %s", sub, arg)
 }
 
 // print out help string by reflecting over fields of provided opts struct
 // and os.Exit(0)
-func Help(subcmd string, opts any) {
+func Help(sub cmd.Subcommand, opts any) {
 	v := reflect.ValueOf(opts)
 	t := v.Type()
 
@@ -110,7 +112,7 @@ func Help(subcmd string, opts any) {
 			)
 		}
 	}
-	log.Printf("um %s%s\n", subcmd, positional)
+	log.Printf("um %s%s\n", sub, positional)
 	w.Flush()
 	os.Exit(0)
 }

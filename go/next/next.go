@@ -7,10 +7,11 @@ import (
 	"os/exec"
 	"strconv"
 
+	cmdpkg "github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
 )
 
-const cmd = "next"
+const this = cmdpkg.Next
 
 type options struct {
 	Descriptor flags.Arg
@@ -35,10 +36,10 @@ func parseArgs(args []string) options {
 		case i == 1 && !flags.HasDashPrefix(arg):
 			opts.Tags.Val = arg
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(cmd, opts)
+			flags.Help(this, opts)
 		default:
-			flags.HelpInvalidArg(cmd, arg)
-			flags.Help(cmd, opts)
+			flags.HelpInvalidArg(this, arg)
+			flags.Help(this, opts)
 		}
 	}
 	return opts
@@ -109,13 +110,13 @@ func Next(args []string) {
 	opts := parseArgs(args)
 	l, err := last()
 	if err != nil {
-		log.Fatalf("um %s: %v", cmd, err)
+		log.Fatalf("um %s: %v", this, err)
 	}
 	filename, err := next(l, opts.Descriptor.Val)
 	if err != nil {
-		log.Fatalf("um %s: %v", cmd, err)
+		log.Fatalf("um %s: %v", this, err)
 	}
 	if err := emacsNext(filename, opts.Tags.Val); err != nil {
-		log.Fatalf("um %s: %v", cmd, err)
+		log.Fatalf("um %s: %v", this, err)
 	}
 }

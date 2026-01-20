@@ -8,10 +8,9 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-)
 
-// but this stinks:
-const lcmd = "last"
+	cmdpkg "github.com/brtholomy/um/go/cmd"
+)
 
 const (
 	// NOTE: the -r flag:
@@ -47,7 +46,7 @@ func last() (string, error) {
 func Last() {
 	s, err := last()
 	if err != nil {
-		log.Fatalf("um %s: %v", lcmd, err)
+		log.Fatalf("um %s: %v", cmdpkg.Last, err)
 	}
 	// send to stdout, not stderr as is default for log.Print:
 	fmt.Println(s)
