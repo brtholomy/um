@@ -11,7 +11,7 @@ import (
 	"github.com/brtholomy/um/go/flags"
 )
 
-const this = cmdpkg.Next
+const cmd = cmdpkg.Next
 
 type options struct {
 	Descriptor flags.Arg
@@ -36,10 +36,10 @@ func parseArgs(args []string) options {
 		case i == 1 && !flags.HasDashPrefix(arg):
 			opts.Tags.Val = arg
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(this, opts)
+			flags.Help(cmd, opts)
 		default:
-			flags.HelpInvalidArg(this, arg)
-			flags.Help(this, opts)
+			flags.HelpInvalidArg(cmd, arg)
+			flags.Help(cmd, opts)
 		}
 	}
 	return opts
@@ -110,13 +110,13 @@ func Next(args []string) {
 	opts := parseArgs(args)
 	l, err := last()
 	if err != nil {
-		log.Fatalf("um %s: %v", this, err)
+		log.Fatalf("um %s: %v", cmd, err)
 	}
 	filename, err := next(l, opts.Descriptor.Val)
 	if err != nil {
-		log.Fatalf("um %s: %v", this, err)
+		log.Fatalf("um %s: %v", cmd, err)
 	}
 	if err := emacsNext(filename, opts.Tags.Val); err != nil {
-		log.Fatalf("um %s: %v", this, err)
+		log.Fatalf("um %s: %v", cmd, err)
 	}
 }
