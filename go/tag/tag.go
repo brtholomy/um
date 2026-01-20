@@ -54,7 +54,7 @@ func parseArgs(args []string) options {
 func Tag(args []string) {
 	opts := parseArgs(args)
 	queries := parseQuery(opts.Query.Val)
-	entries := entriesGlobOrStdin()
+	entries := entriesGlobOrStdin(GLOB)
 
 	// we shrink the entries list immediately if we want a date range:
 	if opts.Date.IsSet() {

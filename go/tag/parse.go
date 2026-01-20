@@ -91,8 +91,8 @@ func getFilelist(glob string) []string {
 }
 
 // create []Entry representing qualifying files in current directory or from stdin
-func entriesGlobOrStdin() []Entry {
-	filelist := getFilelist(GLOB)
+func entriesGlobOrStdin(glob string) []Entry {
+	filelist := getFilelist(glob)
 
 	// NOTE: size 0, capacity specified:
 	entries := make([]Entry, 0, len(filelist))
