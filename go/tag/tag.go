@@ -143,7 +143,7 @@ func (s Set) Intersect(t Set) {
 }
 
 // reads files from stdin if present, otherwise from the glob pattern:
-func Filelist(glob string) []string {
+func getFilelist(glob string) []string {
 	filelist, err := pipe.GetStdin()
 	// otherwise get from the glob:
 	if err != nil {
@@ -156,7 +156,7 @@ func Filelist(glob string) []string {
 }
 
 // TODO: only accepts one kind of syntax at a time
-func ParseQuery(query string) Query {
+func parseQuery(query string) Query {
 	// initialize for the single tag case:
 	q := Query{
 		Op:   SINGLE,
@@ -181,13 +181,13 @@ func ParseQuery(query string) Query {
 	return q
 }
 
-func ParseHeader(content *string) string {
+func parseHeader(content *string) string {
 	// returns complete string if not found:
 	header, _, _ := strings.Cut(*content, "\n\n")
 	return header
 }
 
-func ParseTags(content *string) (tags []string) {
+func parseTags(content *string) (tags []string) {
 	res := tagRegexp.FindAllStringSubmatch(*content, -1)
 	for i := range res {
 		// group submatch is indexed at 1:
@@ -197,7 +197,7 @@ func ParseTags(content *string) (tags []string) {
 	return tags
 }
 
-func ParseDate(content *string) (time.Time, error) {
+func parseDate(content *string) (time.Time, error) {
 	res := dateRegexp.FindStringSubmatch(*content)
 	if len(res) < 2 {
 		return time.Time{}, errors.New("failed to find date string")
@@ -205,11 +205,11 @@ func ParseDate(content *string) (time.Time, error) {
 	return time.Parse(DATE_FORMAT, res[1])
 }
 
-func ParseContent(filename string, content *string) Entry {
+func parseContent(filename string, content *string) Entry {
 	base := filepath.Base(filename)
-	header := ParseHeader(content)
-	date, _ := ParseDate(&header)
-	tags := ParseTags(&header)
+	header := parseHeader(content)
+	date, _ := parseDate(&header)
+	tags := parseTags(&header)
 	return Entry{
 		base,
 		date,
@@ -218,7 +218,7 @@ func ParseContent(filename string, content *string) Entry {
 	}
 }
 
-func Entries(filelist []string) []Entry {
+func getEntries(filelist []string) []Entry {
 	// NOTE: size 0, capacity specified:
 	entries := make([]Entry, 0, len(filelist))
 	for _, f := range filelist {
@@ -227,14 +227,14 @@ func Entries(filelist []string) []Entry {
 			log.Fatal(fmt.Errorf("gag: error opening file: %s\n%w", f, err))
 		}
 		s := string(dat)
-		e := ParseContent(f, &s)
+		e := parseContent(f, &s)
 		entries = append(entries, e)
 	}
 	return entries
 }
 
 // maps tags to a set of filenames
-func Tagmap(entries []Entry) map[string]Set {
+func makeTagmap(entries []Entry) map[string]Set {
 	tagmap := map[string]Set{}
 	for _, e := range entries {
 		for _, tag := range e.tags {
@@ -249,7 +249,7 @@ func Tagmap(entries []Entry) map[string]Set {
 }
 
 // shrinks the entries to only include files within a date range.
-func Date(entries []Entry, date string) []Entry {
+func dateRange(entries []Entry, date string) []Entry {
 	// deleting from the old slice would be less efficient than appending to a new one:
 	ranged := make([]Entry, 0, len(entries))
 	from, to := time.Time{}, time.Time{}
@@ -272,7 +272,7 @@ func Date(entries []Entry, date string) []Entry {
 }
 
 // produce a Set reduced to the files covered by combined queries
-func ProcessQueries(tagmap map[string]Set, query Query) Set {
+func processQueries(tagmap map[string]Set, query Query) Set {
 	set := Set{}
 	// sanity check:
 	if len(query.Tags) < 1 {
@@ -306,8 +306,8 @@ func ProcessQueries(tagmap map[string]Set, query Query) Set {
 }
 
 // inverts the filelist using the full list from entries. works with intersected queries as long as
-// ProcessQueries is called first.
-func Invert(entries []Entry, files Set) Set {
+// processQueries is called first.
+func invert(entries []Entry, files Set) Set {
 	set := Set{}
 	for _, e := range entries {
 		if _, ok := files[e.filename]; !ok {
@@ -318,7 +318,7 @@ func Invert(entries []Entry, files Set) Set {
 }
 
 // adjacencies is a map from tag to a map of other tags occuring in the given files.
-func Adjacencies(entries []Entry, files Set) map[string]map[string]Set {
+func makeAdjacencies(entries []Entry, files Set) map[string]map[string]Set {
 	adjacencies := map[string]map[string]Set{}
 
 	for _, e := range entries {
@@ -348,7 +348,7 @@ func Adjacencies(entries []Entry, files Set) map[string]map[string]Set {
 }
 
 // reduces adjacencies to a single map[tag]Set not including the query tags
-func ReduceAdjacencies(adjacencies map[string]map[string]Set, query Query, invert bool) map[string]Set {
+func reduceAdjacencies(adjacencies map[string]map[string]Set, query Query, invert bool) map[string]Set {
 	reduced := map[string]Set{}
 	if invert {
 		// TODO: something's wrong here...
@@ -378,7 +378,7 @@ func ReduceAdjacencies(adjacencies map[string]map[string]Set, query Query, inver
 }
 
 // prints out the intersected tagmap
-func SprintFiles(files Set) string {
+func sprintFiles(files Set) string {
 	ordered_files := make([]string, len(files))
 	copy(ordered_files, slices.Collect(maps.Keys(files)))
 	slices.Sort(ordered_files)
@@ -386,7 +386,7 @@ func SprintFiles(files Set) string {
 	return fmt.Sprintln(strings.Join(ordered_files, "\n"))
 }
 
-func OrderedTags(tagmap map[string]Set, query Query) []TagCount {
+func orderedTags(tagmap map[string]Set, query Query) []TagCount {
 	ordered_tags := []TagCount{}
 	// TODO: there's code smell about this whole approach.
 	if query.Op == WILD {
@@ -408,8 +408,8 @@ func OrderedTags(tagmap map[string]Set, query Query) []TagCount {
 // and original query tags.
 //
 // format is a TOML syntax possibly useful elsewhere.
-func Print(w io.Writer, entries []Entry, tagmap map[string]Set, files Set, adjacencies map[string]Set, query Query, verbose bool) {
-	f := SprintFiles(files)
+func printFiles(w io.Writer, entries []Entry, tagmap map[string]Set, files Set, adjacencies map[string]Set, query Query, verbose bool) {
+	f := sprintFiles(files)
 	if !verbose {
 		fmt.Print(f)
 		return
@@ -418,7 +418,7 @@ func Print(w io.Writer, entries []Entry, tagmap map[string]Set, files Set, adjac
 	filesstr += f
 
 	tags := fmt.Sprintln("[tags]")
-	otags := OrderedTags(tagmap, query)
+	otags := orderedTags(tagmap, query)
 	tsb := strings.Builder{}
 	// 20 * ' ' + '= 000' = 25
 	tsb.Grow(len(otags) * 25)
@@ -428,7 +428,7 @@ func Print(w io.Writer, entries []Entry, tagmap map[string]Set, files Set, adjac
 	tags += tsb.String()
 
 	adj := fmt.Sprintln("[adjacencies]")
-	oadj := OrderedTags(adjacencies, Query{WILD, []string{}})
+	oadj := orderedTags(adjacencies, Query{WILD, []string{}})
 	asb := strings.Builder{}
 	// 20 * ' ' + '= 000 : 000' = 31
 	asb.Grow(len(oadj) * 31)
@@ -449,25 +449,25 @@ func Print(w io.Writer, entries []Entry, tagmap map[string]Set, files Set, adjac
 }
 
 func tag(opts options) {
-	queries := ParseQuery(opts.Query.Val)
-	filelist := Filelist(GLOB)
-	entries := Entries(filelist)
+	queries := parseQuery(opts.Query.Val)
+	filelist := getFilelist(GLOB)
+	entries := getEntries(filelist)
 
 	// we shrink the entries list immediately if we want a date range:
 	if opts.Date.Val != "" {
-		entries = Date(entries, opts.Date.Val)
+		entries = dateRange(entries, opts.Date.Val)
 	}
-	tagmap := Tagmap(entries)
+	tagmap := makeTagmap(entries)
 
-	// ProcessQueries must precede Invert because we want Invert to respect combined tags:
-	files := ProcessQueries(tagmap, queries)
+	// processQueries must precede invert because we want invert to respect combined tags:
+	files := processQueries(tagmap, queries)
 	if opts.Invert.Val {
-		files = Invert(entries, files)
+		files = invert(entries, files)
 	}
-	// NOTE: the full Adjacencies map may one day be useful on its own
-	adjacencies := ReduceAdjacencies(Adjacencies(entries, files), queries, opts.Invert.Val)
+	// NOTE: the full makeAdjacencies map may one day be useful on its own
+	adjacencies := reduceAdjacencies(makeAdjacencies(entries, files), queries, opts.Invert.Val)
 
-	Print(os.Stdout, entries, tagmap, files, adjacencies, queries, opts.Verbose.Val)
+	printFiles(os.Stdout, entries, tagmap, files, adjacencies, queries, opts.Verbose.Val)
 }
 
 func Tag(args []string) {
