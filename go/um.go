@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/brtholomy/um/go/cmd"
+	"github.com/brtholomy/um/go/last"
 	"github.com/brtholomy/um/go/next"
 	"github.com/brtholomy/um/go/sort"
 	"github.com/brtholomy/um/go/tag"
@@ -38,7 +39,7 @@ func main() {
 	case cmd.Next:
 		next.Next(args)
 	case cmd.Last:
-		next.Last()
+		last.Last(args)
 	case cmd.Tag:
 		tag.Tag(args)
 	case cmd.Sort:

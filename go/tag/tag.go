@@ -5,6 +5,7 @@ import (
 
 	cmdpkg "github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
+	"github.com/brtholomy/um/go/last"
 )
 
 // just so that copied calls into flags.Help don't have to be adjusted between files:
@@ -54,7 +55,7 @@ func parseArgs(args []string) options {
 func Tag(args []string) {
 	opts := parseArgs(args)
 	queries := parseQuery(opts.Query.Val)
-	entries := entriesGlobOrStdin(GLOB)
+	entries := entriesGlobOrStdin(last.GLOB)
 
 	// we shrink the entries list immediately if we want a date range:
 	if opts.Date.IsSet() {

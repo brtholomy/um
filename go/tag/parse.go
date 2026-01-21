@@ -14,9 +14,6 @@ import (
 )
 
 const (
-	// TODO: source in common with last.go
-	GLOB = "[0-9]*.md"
-
 	// The layout string must be a representation of:
 	// Jan 2 15:04:05 2006 MST
 	// 1   2  3  4  5    6  -7

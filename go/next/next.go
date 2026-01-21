@@ -5,13 +5,19 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
+	"regexp"
 	"strconv"
 
 	cmdpkg "github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
+	"github.com/brtholomy/um/go/last"
 )
 
 const cmd = cmdpkg.Next
+
+const FILE_REGEXP = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
+
+var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
 
 type options struct {
 	Descriptor flags.Arg
@@ -47,11 +53,11 @@ func parseArgs(args []string) options {
 
 // takes the complete last file string
 // returns the number as string
-func numFromLast(last string) (string, error) {
-	res := fileRegexp.FindStringSubmatch(last)
+func numFromLast(l string) (string, error) {
+	res := fileRegexp.FindStringSubmatch(l)
 	num := ""
 	if len(res) < 2 {
-		return num, errors.New(NOT_FOUND_MSG)
+		return num, errors.New(last.NOT_FOUND_MSG)
 	}
 	num = res[1]
 	return num, nil
@@ -108,7 +114,7 @@ func emacsNext(f string, tags string) error {
 
 func Next(args []string) {
 	opts := parseArgs(args)
-	l, err := last()
+	l, err := last.GlobLast(last.GLOB)
 	if err != nil {
 		log.Fatalf("um %s: %v", cmd, err)
 	}
