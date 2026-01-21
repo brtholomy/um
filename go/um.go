@@ -13,7 +13,7 @@ import (
 	"github.com/brtholomy/um/go/tag"
 )
 
-var helpShort string = fmt.Sprintf("um [%s | %s | %s | %s | %s]", cmd.Tag, cmd.Next, cmd.Last, cmd.Sort, cmd.Help)
+var helpShort string = fmt.Sprintf("um [%s | %s | %s | %s | %s | %s]", cmd.Next, cmd.Last, cmd.Tag, cmd.Cat, cmd.Sort, cmd.Help)
 var helpLong string = fmt.Sprintf(`%s
 
 An (U)ltralight database for (M)arkdown composition.
@@ -43,10 +43,10 @@ func main() {
 		last.Last(args)
 	case cmd.Tag:
 		tag.Tag(args)
-	case cmd.Sort:
-		sort.Sort(args)
 	case cmd.Cat:
 		cat.Cat(args)
+	case cmd.Sort:
+		sort.Sort(args)
 	case cmd.Help:
 		log.Fatalln(helpLong)
 	default:
