@@ -30,6 +30,7 @@ func initOpts() options {
 }
 
 func cat(files []string) (string, error) {
+	sb := strings.Builder{}
 	var total int64
 	for _, f := range files {
 		stat, err := os.Stat(f)
@@ -40,15 +41,16 @@ func cat(files []string) (string, error) {
 			total += stat.Size()
 		}
 	}
-	ff := make([]string, 0, total)
+	sb.Grow(int(total))
+
 	for _, f := range files {
 		dat, err := os.ReadFile(f)
 		if err != nil {
 			return "", fmt.Errorf("error opening file: %w", err)
 		}
-		ff = append(ff, string(dat))
+		sb.WriteString(fmt.Sprintf("%s%s", dat, SEPARATOR))
 	}
-	return strings.Join(ff, SEPARATOR), nil
+	return strings.TrimSuffix(sb.String(), SEPARATOR), nil
 }
 
 func Cat(args []string) {
