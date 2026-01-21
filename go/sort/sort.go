@@ -7,12 +7,15 @@ import (
 	"slices"
 	"strings"
 
-	cmdpkg "github.com/brtholomy/um/go/cmd"
+	"github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
 	"github.com/brtholomy/um/go/pipe"
 )
 
-const cmd = cmdpkg.Sort
+const (
+	CMD     = cmd.Sort
+	SUMMARY = "sort a filelist using a provided key filelist"
+)
 
 type options struct {
 	Source flags.Flag[string]
@@ -42,15 +45,15 @@ func parseArgs(args []string) options {
 		case arg == opts.Write.Long || arg == opts.Write.Short:
 			opts.Write.Val = true
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(cmd, opts)
+			flags.Help(CMD, SUMMARY, opts)
 		default:
-			flags.HelpInvalidArg(cmd, arg)
-			flags.Help(cmd, opts)
+			flags.HelpInvalidArg(CMD, arg)
+			flags.Help(CMD, SUMMARY, opts)
 		}
 	}
 	if !opts.Key.IsSet() {
-		flags.HelpRequired(cmd, opts.Key.Long)
-		flags.Help(cmd, opts)
+		flags.HelpRequired(CMD, opts.Key.Long)
+		flags.Help(CMD, SUMMARY, opts)
 	}
 	return opts
 }
@@ -69,7 +72,7 @@ func fileListSplit(f string) []string {
 	dat, err := os.ReadFile(f)
 	if err != nil {
 		// if this fails all is lost. just exit.
-		log.Fatalf("um %s: error opening file: %s\n%s", cmd, f, err)
+		log.Fatalf("um %s: error opening file: %s\n%s", CMD, f, err)
 	}
 	return strings.Split(string(dat), pipe.Newline)
 }
@@ -104,7 +107,7 @@ func sort(sslice []string, kmap map[string]int) string {
 
 func write(file string, content string) {
 	if err := os.WriteFile(file, []byte(content), 0664); err != nil {
-		log.Fatalf("um %s: error writing file: %s\n%s", cmd, file, err)
+		log.Fatalf("um %s: error writing file: %s\n%s", CMD, file, err)
 	}
 }
 

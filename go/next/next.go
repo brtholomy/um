@@ -8,12 +8,15 @@ import (
 	"regexp"
 	"strconv"
 
-	cmdpkg "github.com/brtholomy/um/go/cmd"
+	"github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
 	"github.com/brtholomy/um/go/last"
 )
 
-const cmd = cmdpkg.Next
+const (
+	CMD     = cmd.Next
+	SUMMARY = "create the next um file and open with emacsclient"
+)
 
 const FILE_REGEXP = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
 
@@ -42,10 +45,10 @@ func parseArgs(args []string) options {
 		case i == 1 && !flags.HasDashPrefix(arg):
 			opts.Tags.Val = arg
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(cmd, opts)
+			flags.Help(CMD, SUMMARY, opts)
 		default:
-			flags.HelpInvalidArg(cmd, arg)
-			flags.Help(cmd, opts)
+			flags.HelpInvalidArg(CMD, arg)
+			flags.Help(CMD, SUMMARY, opts)
 		}
 	}
 	return opts
@@ -116,13 +119,13 @@ func Next(args []string) {
 	opts := parseArgs(args)
 	l, err := last.GlobLast(last.GLOB)
 	if err != nil {
-		log.Fatalf("um %s: %v", cmd, err)
+		log.Fatalf("um %s: %v", CMD, err)
 	}
 	filename, err := next(l, opts.Descriptor.Val)
 	if err != nil {
-		log.Fatalf("um %s: %v", cmd, err)
+		log.Fatalf("um %s: %v", CMD, err)
 	}
 	if err := emacsNext(filename, opts.Tags.Val); err != nil {
-		log.Fatalf("um %s: %v", cmd, err)
+		log.Fatalf("um %s: %v", CMD, err)
 	}
 }

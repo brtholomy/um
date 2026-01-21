@@ -86,11 +86,12 @@ func HelpInvalidArg(sub cmd.Subcommand, arg string) {
 
 // print out help string by reflecting over fields of provided opts struct
 // and os.Exit(0)
-func Help(sub cmd.Subcommand, opts any) {
+func Help(sub cmd.Subcommand, summary string, opts any) {
 	v := reflect.ValueOf(opts)
 	t := v.Type()
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', 0)
+	// everything should go to either stderr or stdout:
+	w := tabwriter.NewWriter(os.Stderr, 0, 0, 3, ' ', 0)
 	positional := ""
 
 	for i := 0; i < v.NumField(); i++ {
@@ -112,7 +113,8 @@ func Help(sub cmd.Subcommand, opts any) {
 			)
 		}
 	}
-	log.Printf("um %s%s\n", sub, positional)
+	log.Printf("um %s%s\n\n", sub, positional)
+	log.Printf("%s\n\n", summary)
 	w.Flush()
 	os.Exit(0)
 }

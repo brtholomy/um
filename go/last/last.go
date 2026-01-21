@@ -6,11 +6,14 @@ import (
 	"log"
 	"path/filepath"
 
-	cmdpkg "github.com/brtholomy/um/go/cmd"
+	"github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
 )
 
-const cmd = cmdpkg.Last
+const (
+	CMD     = cmd.Last
+	SUMMARY = "print the lexically last um file"
+)
 
 const (
 	GLOB = "[0-9]*.md"
@@ -33,10 +36,10 @@ func parseArgs(args []string) options {
 	for _, arg := range args {
 		switch {
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(cmd, opts)
+			flags.Help(CMD, SUMMARY, opts)
 		default:
-			flags.HelpInvalidArg(cmd, arg)
-			flags.Help(cmd, opts)
+			flags.HelpInvalidArg(CMD, arg)
+			flags.Help(CMD, SUMMARY, opts)
 		}
 	}
 	return opts
@@ -59,7 +62,7 @@ func Last(args []string) {
 	_ = parseArgs(args)
 	s, err := GlobLast(GLOB)
 	if err != nil {
-		log.Fatalf("um %s: %v", cmdpkg.Last, err)
+		log.Fatalf("um %s: %v", cmd.Last, err)
 	}
 	// send to stdout, not stderr as is default for log.Print:
 	fmt.Println(s)

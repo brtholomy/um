@@ -3,13 +3,15 @@ package tag
 import (
 	"os"
 
-	cmdpkg "github.com/brtholomy/um/go/cmd"
+	"github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/flags"
 	"github.com/brtholomy/um/go/last"
 )
 
-// just so that copied calls into flags.Help don't have to be adjusted between files:
-const cmd = cmdpkg.Tag
+const (
+	CMD     = cmd.Tag
+	SUMMARY = "search for files with a set of tags"
+)
 
 type options struct {
 	Query   flags.Arg
@@ -43,10 +45,10 @@ func parseArgs(args []string) options {
 		case arg == opts.Date.Long || arg == opts.Date.Short:
 			i, opts.Date.Val = flags.ValidateIncrementFetchOrExit(args, i)
 		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(cmd, opts)
+			flags.Help(CMD, SUMMARY, opts)
 		default:
-			flags.HelpInvalidArg(cmd, arg)
-			flags.Help(cmd, opts)
+			flags.HelpInvalidArg(CMD, arg)
+			flags.Help(CMD, SUMMARY, opts)
 		}
 	}
 	return opts
