@@ -34,7 +34,7 @@ func cat(files []string) (string, error) {
 	for _, f := range files {
 		dat, err := os.ReadFile(f)
 		if err != nil {
-			return "", fmt.Errorf("error opening file: %w", err)
+			return "", fmt.Errorf("error opening target file: %w", err)
 		}
 		ff = append(ff, string(dat))
 	}

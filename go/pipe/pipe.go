@@ -20,12 +20,12 @@ func GetStdin() ([]string, error) {
 	if !isStdinLoaded() {
 		return nil, errors.New("stdin not loaded")
 	}
-	data, err := io.ReadAll(os.Stdin)
+	dat, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// TODO: there's got to be a better way:
-	s, _ := strings.CutSuffix(string(data), Newline)
+	s := strings.TrimSuffix(string(dat), Newline)
 	return strings.Split(s, Newline), nil
 }
 
@@ -53,5 +53,6 @@ func FileListSplit(f string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening file: %w", err)
 	}
-	return strings.Split(string(dat), Newline), nil
+	s := strings.TrimSuffix(string(dat), Newline)
+	return strings.Split(s, Newline), nil
 }
