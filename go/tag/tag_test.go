@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	// TODO: switch to something lighter: https://github.com/alecthomas/assert
 	"github.com/stretchr/testify/assert"
 )
 

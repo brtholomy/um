@@ -1,46 +1,35 @@
 package next
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"log"
-	"os/exec"
+	"path/filepath"
 	"regexp"
-	"strings"
 
 	cmdpkg "github.com/brtholomy/um/go/cmd"
 )
 
 const (
-	// NOTE: the -r flag:
-	LS_CMD = `ls -r [0-9]*.md`
+	GLOB = "[0-9]*.md"
 	// we only care about the number group:
 	FILE_REGEXP   = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
-	NOT_FOUND_MSG = "um files not found"
+	NOT_FOUND_MSG = "um files not found: " + GLOB
 )
 
 var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
 
-// calls ls to get the lexical last file
+// get the lexical last file from GLOB
 func last() (string, error) {
-	// NOTE: globbing requires invoking the shell as cmd:
-	cmd := exec.Command("sh", "-c", LS_CMD)
-
-	// fine grained control:
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	// the returned err is ExitStatus, which has stderr embedded, but i find this clearer:
-	if err := cmd.Run(); err != nil {
-		return "", errors.New(stderr.String())
+	// NOTE: filepath.Glob is more reliable than a manual ls call:
+	filelist, err := filepath.Glob(GLOB)
+	if err != nil {
+		return "", err
 	}
-
-	lines := strings.Split(stdout.String(), "\n")
-	if len(lines) == 0 {
+	if len(filelist) == 0 {
 		return "", errors.New(NOT_FOUND_MSG)
 	}
-	return lines[0], nil
+	return filelist[len(filelist)-1], nil
 }
 
 func Last() {
