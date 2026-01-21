@@ -33,31 +33,6 @@ func initOpts() options {
 	}
 }
 
-func parseArgs(args []string) options {
-	opts := initOpts()
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
-		switch {
-		case arg == opts.Source.Long || arg == opts.Source.Short:
-			i, opts.Source.Val = flags.ValidateIncrementFetchOrExit(args, i)
-		case arg == opts.Key.Long || arg == opts.Key.Short:
-			i, opts.Key.Val = flags.ValidateIncrementFetchOrExit(args, i)
-		case arg == opts.Write.Long || arg == opts.Write.Short:
-			opts.Write.Val = true
-		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(CMD, SUMMARY, opts)
-		default:
-			flags.HelpInvalidArg(CMD, arg)
-			flags.Help(CMD, SUMMARY, opts)
-		}
-	}
-	if !opts.Key.IsSet() {
-		flags.HelpRequired(CMD, opts.Key.Long)
-		flags.Help(CMD, SUMMARY, opts)
-	}
-	return opts
-}
-
 // reads files from stdin if present, otherwise from the filename:
 func fileListSplitMaybeStdin(f string) []string {
 	filelist, err := pipe.GetStdin()
@@ -112,7 +87,13 @@ func write(file string, content string) {
 }
 
 func Sort(args []string) {
-	opts := parseArgs(args)
+	opts := initOpts()
+	flags.ParseArgs(CMD, SUMMARY, args, &opts)
+	// BORK: by hand for now:
+	if !opts.Key.IsSet() {
+		flags.HelpRequired(CMD, opts.Key.Long)
+		flags.Help(CMD, SUMMARY, opts)
+	}
 
 	sslice := fileListSplitMaybeStdin(opts.Source.Val)
 	kslice := fileListSplit(opts.Key.Val)

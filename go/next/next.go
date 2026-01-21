@@ -36,24 +36,6 @@ func initOpts() options {
 	}
 }
 
-func parseArgs(args []string) options {
-	opts := initOpts()
-	for i, arg := range args {
-		switch {
-		case i == 0 && !flags.HasDashPrefix(arg):
-			opts.Descriptor.Val = arg
-		case i == 1 && !flags.HasDashPrefix(arg):
-			opts.Tags.Val = arg
-		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(CMD, SUMMARY, opts)
-		default:
-			flags.HelpInvalidArg(CMD, arg)
-			flags.Help(CMD, SUMMARY, opts)
-		}
-	}
-	return opts
-}
-
 // takes the complete last file string
 // returns the number as string
 func numFromLast(l string) (string, error) {
@@ -116,7 +98,9 @@ func emacsNext(f string, tags string) error {
 }
 
 func Next(args []string) {
-	opts := parseArgs(args)
+	opts := initOpts()
+	flags.ParseArgs(CMD, SUMMARY, args, &opts)
+
 	l, err := last.GlobLast(last.GLOB)
 	if err != nil {
 		log.Fatalf("um %s: %v", CMD, err)

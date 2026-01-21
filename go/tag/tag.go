@@ -31,31 +31,10 @@ func initOpts() options {
 	}
 }
 
-func parseArgs(args []string) options {
-	opts := initOpts()
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
-		switch {
-		case i == 0 && !flags.HasDashPrefix(arg):
-			opts.Query.Val = arg
-		case arg == opts.Invert.Long || arg == opts.Invert.Short:
-			opts.Invert.Val = true
-		case arg == opts.Verbose.Long || arg == opts.Verbose.Short:
-			opts.Verbose.Val = true
-		case arg == opts.Date.Long || arg == opts.Date.Short:
-			i, opts.Date.Val = flags.ValidateIncrementFetchOrExit(args, i)
-		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(CMD, SUMMARY, opts)
-		default:
-			flags.HelpInvalidArg(CMD, arg)
-			flags.Help(CMD, SUMMARY, opts)
-		}
-	}
-	return opts
-}
-
 func Tag(args []string) {
-	opts := parseArgs(args)
+	opts := initOpts()
+	flags.ParseArgs(CMD, SUMMARY, args, &opts)
+
 	queries := parseQuery(opts.Query.Val)
 	entries := entriesGlobOrStdin(last.GLOB)
 

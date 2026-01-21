@@ -31,20 +31,6 @@ func initOpts() options {
 	}
 }
 
-func parseArgs(args []string) options {
-	opts := initOpts()
-	for _, arg := range args {
-		switch {
-		case arg == opts.Help.Long || arg == opts.Help.Short:
-			flags.Help(CMD, SUMMARY, opts)
-		default:
-			flags.HelpInvalidArg(CMD, arg)
-			flags.Help(CMD, SUMMARY, opts)
-		}
-	}
-	return opts
-}
-
 // get the lexical last file from GLOB
 func GlobLast(glob string) (string, error) {
 	// NOTE: filepath.Glob is more reliable than a manual ls call:
@@ -59,7 +45,9 @@ func GlobLast(glob string) (string, error) {
 }
 
 func Last(args []string) {
-	_ = parseArgs(args)
+	opts := initOpts()
+	flags.ParseArgs(CMD, SUMMARY, args, &opts)
+
 	s, err := GlobLast(GLOB)
 	if err != nil {
 		log.Fatalf("um %s: %v", cmd.Last, err)
