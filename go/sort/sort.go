@@ -33,25 +33,6 @@ func initOpts() options {
 	}
 }
 
-// reads files from stdin if present, otherwise from the filename:
-func fileListSplitMaybeStdin(f string) []string {
-	filelist, err := pipe.GetStdin()
-	if err != nil {
-		filelist = fileListSplit(f)
-	}
-	return filelist
-}
-
-// opens the given filename and splits into lines:
-func fileListSplit(f string) []string {
-	dat, err := os.ReadFile(f)
-	if err != nil {
-		// if this fails all is lost. just exit.
-		log.Fatalf("um %s: error opening file: %s\n%s", CMD, f, err)
-	}
-	return strings.Split(string(dat), pipe.Newline)
-}
-
 // record the order of the given filelist.
 func kMap(kslice []string) map[string]int {
 	m := make(map[string]int, 0)
@@ -95,8 +76,14 @@ func Sort(args []string) {
 		flags.Help(CMD, SUMMARY, opts)
 	}
 
-	sslice := fileListSplitMaybeStdin(opts.Source.Val)
-	kslice := fileListSplit(opts.Key.Val)
+	sslice, err := pipe.FileListSplitMaybeStdin(opts.Source.Val)
+	if err != nil {
+		log.Fatalf("um %s: %s", CMD, err)
+	}
+	kslice, err := pipe.FileListSplit(opts.Key.Val)
+	if err != nil {
+		log.Fatalf("um %s: %s", CMD, err)
+	}
 	kmap := kMap(kslice)
 	out := sort(sslice, kmap)
 	if opts.Write.IsSet() {
