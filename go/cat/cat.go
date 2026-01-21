@@ -30,9 +30,17 @@ func initOpts() options {
 }
 
 func cat(files []string) (string, error) {
-	// strings.Builder ?
-	// can we estimate needed size? do an ls -S call?
-	ff := []string{}
+	var total int64
+	for _, f := range files {
+		stat, err := os.Stat(f)
+		if err != nil {
+			return "", fmt.Errorf("stat failed: %w", err)
+		}
+		if !stat.IsDir() && stat.Mode().IsRegular() {
+			total += stat.Size()
+		}
+	}
+	ff := make([]string, 0, total)
 	for _, f := range files {
 		dat, err := os.ReadFile(f)
 		if err != nil {
@@ -54,5 +62,5 @@ func Cat(args []string) {
 	if err != nil {
 		log.Fatalf("um %s: %s", CMD, err)
 	}
-	fmt.Println(s)
+	fmt.Print(s)
 }
