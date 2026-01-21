@@ -69,7 +69,7 @@ func fileListSplit(f string) []string {
 	dat, err := os.ReadFile(f)
 	if err != nil {
 		// if this fails all is lost. just exit.
-		log.Fatal(fmt.Errorf("um sort: error opening file: %s\n%w", f, err))
+		log.Fatalf("um %s: error opening file: %s\n%s", cmd, f, err)
 	}
 	return strings.Split(string(dat), pipe.Newline)
 }
@@ -102,9 +102,9 @@ func sort(sslice []string, kmap map[string]int) string {
 	return strings.Join(oslice, pipe.Newline) + pipe.Newline
 }
 
-func Write(file string, content string) {
+func write(file string, content string) {
 	if err := os.WriteFile(file, []byte(content), 0664); err != nil {
-		log.Fatal(err)
+		log.Fatalf("um %s: error writing file: %s\n%s", cmd, file, err)
 	}
 }
 
@@ -115,8 +115,8 @@ func Sort(args []string) {
 	kslice := fileListSplit(opts.Key.Val)
 	kmap := kMap(kslice)
 	out := sort(sslice, kmap)
-	if opts.Write.Val {
-		Write(opts.Key.Val, out)
+	if opts.Write.IsSet() {
+		write(opts.Key.Val, out)
 	} else {
 		// to stdout
 		fmt.Print(out)
