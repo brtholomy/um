@@ -10,7 +10,7 @@ import (
 
 const (
 	CMD     = cmd.Tag
-	SUMMARY = "search for files with a set of tags"
+	SUMMARY = "query for a filelist with a set of tags"
 )
 
 type options struct {
@@ -23,7 +23,7 @@ type options struct {
 
 func initOpts() options {
 	return options{
-		flags.Arg{"", "tag query"},
+		flags.Arg{"", "tag query: understands intersection '+' and union ','"},
 		flags.Flag[string]{"--date", "-d", "", "date range in ISO 8601: YYYY.MM.DD[-YYYY.MM.DD]"},
 		flags.Flag[bool]{"--invert", "-i", false, "invert match"},
 		flags.Flag[bool]{"--verbose", "-v", false, "print a verbose summary"},
