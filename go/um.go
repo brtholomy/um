@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/brtholomy/um/go/cat"
 	"github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/last"
 	"github.com/brtholomy/um/go/next"
@@ -44,6 +45,8 @@ func main() {
 		tag.Tag(args)
 	case cmd.Sort:
 		sort.Sort(args)
+	case cmd.Cat:
+		cat.Cat(args)
 	case cmd.Help:
 		log.Fatalln(helpLong)
 	default:

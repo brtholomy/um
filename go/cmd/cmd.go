@@ -7,5 +7,6 @@ const (
 	Next Subcommand = "next"
 	Last Subcommand = "last"
 	Sort Subcommand = "sort"
+	Cat  Subcommand = "cat"
 	Help Subcommand = "help"
 )
