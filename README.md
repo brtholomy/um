@@ -2,17 +2,17 @@
 
 An (U)ltralight database for (M)arkdown composition.
 
-`um` is an ultralight database design and emacs toolkit for organizing writing into larger compositions. It uses only unique filenames, POSIX filesystem conventions, the builtin emacs `project` package, and standard POSIX commandline tools to build out the CLI.
+`um` is an ultralight *zettelkasten* design and emacs toolkit for organizing writing into larger compositions. It uses unique filenames, simple plaintext tags, the builtin emacs `project` package, and a Go CLI.
 
-It tries to be stupid-simple. Because the "CLI" is just sh and awk, it really only has emacs as a dependency.
+It tries to be stupid-simple on the filesystem side, while offering powerful conveniences on the tooling side. The idea is to prioritize the moment of creation and get all noise out of the way.
 
 It consists of two parts:
 
-1. Elisp for functionality within emacs. Most of it is integrated directly with the `project` interface, and consists the ability to find a file from a filename.
+1. Elisp for functionality within emacs. Much of it is integrated directly with the `project` interface, and consists of the ability to find a file from a filename and search for tags.
 
-2. Shell scripts for the commandline interface. I prefer a CLI for file creation and management rather than more emacs functions, because chaining shell commands is easy and I think of the commandline as the point of reference for all filesystem management.
+2. A commandline interface written in Go. I prefer a CLI for file creation and management rather than more emacs functions, because chaining shell commands is easy and I think of the commandline as the point of reference for all filesystem management.
 
-Conceptually, `um` is somewhat like org-roam, except without any database dependency. (And it assumes Markdown rather than org, which I don't care for.)
+Conceptually, `um` is somewhat like org-roam, except without any database dependency. And it assumes Markdown rather than org, which I find too heavy-handed.
 
 This "database" depends on a few simple ideas:
 
@@ -22,13 +22,13 @@ This "database" depends on a few simple ideas:
     ls | egrep '^[[:digit:]]+\.?.*\.md|txt'
     ```
 
-    In pseudocode:
+    Or:
 
     ```
-    [leadings numbers].[optional string descriptor and . separator][md|txt]
+    digits.[descriptor.]md
     ```
 
-2. Placing that same id into the file header, so that concatenated files have reference back to their source - like this:
+2. A very simple file header consisting of the title and date, with optional tags and place marker.
 
     ```markdown
     # 001.foo.md
@@ -37,11 +37,9 @@ This "database" depends on a few simple ideas:
     + tag_optional
     ```
 
-    See the `um cat` command for why this matters.
+3. Using a "root" project defined by `um-root-glob`, where source files should first be composed and where we can assume a file exists if not elsewhere. This matters when trying to navigate back to a source file.
 
-3. Using a single "root" project defined by `um-root-glob`, where source files should first be composed and where we can assume a file exists if not elsewhere. This matters when trying to navigate back to a source file.
-
-4. Using the built-in emacs `project` package to organize compositions built from these source files.
+4. Using the built-in emacs `project` package and a powerful CLI to organize compositions built from these source files.
 
 # installation
 
@@ -51,10 +49,17 @@ Clone it:
 git clone https://github.com/brtholomy/um.git ~/.emacs.d/um
 ```
 
-Symlink the `um` CLI somewhere in your `PATH`:
+Build the `um` binary:
 
 ```sh
-ln -s ~/.emacs.d/um/shell/um /usr/local/bin/um
+cd ~/.emacs.d/um/go
+go build -o um .
+```
+
+Symlink somewhere in your `PATH`:
+
+```sh
+ln -s ~/.emacs.d/um/go/um /usr/local/bin/um
 ```
 
 ## config
@@ -89,13 +94,26 @@ There are two primary ways this is accessed:
 1. `find-file` and `next-history-element`, which will work as `C-x C-f M-n` out of the box. See `um-find-file-at-point`.
 2. By invoking `emark-dwim` on any filename. Requires `embark` and the `advice-add` shown above.
 
-# CLI usage
+# CLI
 
-The "command line interface" is just a small set of convenient scripts: since these are just text files, we could just as easily create everything manually.
+The "command line interface" is a set of conveniences: since this is all plain text, we could just as easily create everything manually.
 
-To get started, create an empty directory to serve as content origin. It doesn't matter where or what it's called, since the shell scripts only assume a sequentially numbered collection of files.
+Try:
 
-## next
+```
+um help
+um tag --help
+```
+
+## seed
+
+To get started, create an empty directory to serve as content origin. It doesn't matter where or what it's called, since the CLI only assumes a sequentially numbered collection of files. Then create your first file, while seeding the zero-width. 4 zeros is plenty, since that means 10k files. My zettelkasten is 20 years old and has about 3000 entries with almost a million words:
+
+```
+touch 0000.md
+```
+
+## um next
 
 To create a new file:
 
@@ -174,49 +192,28 @@ Yields:
 + baz
 ```
 
-## last
+## um last
 
-`um last` will open the name of the last numbered file with emacsclient.
+`um last` will print the name of the last numbered file.
 
-## cat
+## um mv
 
-One of the advantages of the header specification, is that it allows us to `cat` files together without losing track of their origin. This is probably the most important design decision, since the more complicated option would have been to keep all source files intact, and compose larger projects by reference back to the original file only - like org-roam does. This would, however, introduce considerably more complexity, and it would mean that project files become obscure lists of files, instead of content - which would largely defeat the value of git and plaintext in general.
-
-So rather than overengineer, like most engineers do, I choose to stick with plaintext files everywhere, and let the source file serve as history relative to the larger project. It means that the source of truth for my writing projects travels downstream, which is not ideal but largely fine - since git makes history of everything anyway.
-
-All this stupid little command does, is concatenate files together while placing a Markdown horizontal rule between them, like this:
+The `um mv` command makes it easier to add or change the string descriptor, while also updating the header:
 
 ```sh
-um cat 01.md 02.md
+um mv 02.foo.md bar
+```
 
-# 01.md
-: 2024.01.14
+And we get `02.bar.md`:
 
----
-
-# 02.md
+```markdown
+# 02.bar.md
 : 2024.01.14
 ```
 
-Which means we can pipe the output wherever we like:
+## um tag
 
-```sh
-um cat 01.md 02.md > /tmp/foo.md
-```
-
-## rename
-
-The `um rename` command makes it easier to add or change the string descriptor:
-
-```sh
-um rename 02.md foo
-```
-
-And we get `02.foo.md`.
-
-## tag
-
-The file header allows for an optional block of tags, marked by a `+` like this:
+The file header allows for an optional list of tags, one per line, marked by a leading `+`:
 
 ```markdown
 # 02.md
@@ -225,17 +222,69 @@ The file header allows for an optional block of tags, marked by a `+` like this:
 + bar
 ```
 
-We can then grep for these tags. This command just makes it easier to list them:
-
-```sh
-um tag foo
-02.md
+```markdown
+# 03.md
+: 2024.01.14
++ foo
 ```
 
-So we can pipe it:
+This is the most powerful aspect of `um`: a simple list of tags applied to source files. It encourages small files organized from the bottom up, rather than topdown management - which gets in the way of good creative moods.
+
+We can then search for files containing these tags. This list just goes to stdout, so the idea is to pipe it into a file for reordering within emacs:
 
 ```sh
-um tag foo | xargs um cat > /tmp/foo.md
+um tag foo > ./some/filelist.md
+```
+
+The query supports union as `+` and intersection as `,`:
+
+```sh
+> um tag foo+bar
+
+02.md
+
+> um tag foo,bar
+
+02.md
+03.md
+```
+
+And the complement:
+
+```sh
+> um tag foo --invert
+
+03.md
+```
+
+Pipe them together to use a big union from which to subtract:
+
+```sh
+um tag foo,bar | um tag baz --invert
+```
+
+Run `um tag --help` to see what it can do.
+
+## um sort
+
+When working with the filelists produced by `um tag`, we'll want to rearrange the order of files and add or remove tags. Then when we update our filelist by rerunning `um tag`, we want the output to respect our updated order. `um sort` does this:
+
+```sh
+um tag foo+bar | um sort --key some/filelist.md
+```
+
+## um cat
+
+This command is designed to work with the filelists produced by `um tag`. It separates files with a Markdown horizontal rule `---` while stripping their headers:
+
+```sh
+um tag foo | um cat
+```
+
+As the last step in composing larger pieces, it accepts a filelist and a base directory to find those files. We can then pipe the output wherever we like:
+
+```sh
+um cat filelist.md --base ../ > finished.md
 ```
 
 And there you have the virtue of the Unix philosophy.
