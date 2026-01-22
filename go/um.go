@@ -8,12 +8,13 @@ import (
 	"github.com/brtholomy/um/go/cat"
 	"github.com/brtholomy/um/go/cmd"
 	"github.com/brtholomy/um/go/last"
+	"github.com/brtholomy/um/go/mv"
 	"github.com/brtholomy/um/go/next"
 	"github.com/brtholomy/um/go/sort"
 	"github.com/brtholomy/um/go/tag"
 )
 
-var helpShort string = fmt.Sprintf("um [%s | %s | %s | %s | %s | %s]", cmd.Next, cmd.Last, cmd.Tag, cmd.Cat, cmd.Sort, cmd.Help)
+var helpShort string = fmt.Sprintf("um [%s | %s | %s | %s | %s | %s | %s]", cmd.Next, cmd.Last, cmd.Tag, cmd.Cat, cmd.Sort, cmd.Mv, cmd.Help)
 var helpLong string = fmt.Sprintf(`%s
 
 An (U)ltralight database for (M)arkdown composition.
@@ -47,6 +48,8 @@ func main() {
 		cat.Cat(args)
 	case cmd.Sort:
 		sort.Sort(args)
+	case cmd.Mv:
+		mv.Mv(args)
 	case cmd.Help:
 		log.Fatalln(helpLong)
 	default:

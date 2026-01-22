@@ -38,7 +38,7 @@ func initOpts() options {
 
 // takes the complete last file string
 // returns the number as string
-func numFromLast(l string) (string, error) {
+func NumFromLast(l string) (string, error) {
 	res := fileRegexp.FindStringSubmatch(l)
 	num := ""
 	if len(res) < 2 {
@@ -51,7 +51,7 @@ func numFromLast(l string) (string, error) {
 // takes the complete last file string and new descriptor
 // returns the complete next file string
 func next(last string, desc string) (string, error) {
-	num, err := numFromLast(last)
+	num, err := NumFromLast(last)
 	if err != nil {
 		return "", err
 	}

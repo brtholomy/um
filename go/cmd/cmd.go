@@ -8,5 +8,6 @@ const (
 	Last Subcommand = "last"
 	Sort Subcommand = "sort"
 	Cat  Subcommand = "cat"
+	Mv   Subcommand = "mv"
 	Help Subcommand = "help"
 )
