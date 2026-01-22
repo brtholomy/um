@@ -126,7 +126,7 @@ func Help(sub cmd.Subcommand, summary string, opts any) {
 
 // parse the commandline args
 //
-// reflect on the incoming opts struct filled out with flags.Arg, flags.Flag[string], flags.Flag[string]
+// reflect on the incoming opts struct filled out with flags.Arg, flags.Flag[bool], flags.Flag[string]
 // and fill their "Val" field appropriately.
 //
 // WARN: incoming opts must be a pointer!
