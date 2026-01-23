@@ -1,8 +1,8 @@
 # um
 
-An (U)ltralight database for (M)arkdown composition.
+An (U)ltralight *zettelkasten* for (M)arkdown composition.
 
-`um` is an ultralight *zettelkasten* design and emacs toolkit for organizing writing into larger compositions. It uses unique filenames, simple plaintext tags, the builtin emacs `project` package, and a Go CLI.
+`um` is a *zettelkasten* specification, an emacs toolkit, and a CLI for organizing writing into larger compositions. It uses unique filenames, plaintext tags, the builtin emacs `project` package, and simple commandline conventions. It's grown out of my own scripts and emacs hacks over the years.
 
 It tries to be stupid-simple on the filesystem side, while offering powerful conveniences on the tooling side. The idea is to prioritize the moment of creation and get all noise out of the way.
 
