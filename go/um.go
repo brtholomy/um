@@ -17,7 +17,7 @@ import (
 var helpShort string = fmt.Sprintf("um [%s | %s | %s | %s | %s | %s | %s]", cmd.Next, cmd.Last, cmd.Tag, cmd.Cat, cmd.Sort, cmd.Mv, cmd.Help)
 var helpLong string = fmt.Sprintf(`%s
 
-An (U)ltralight database for (M)arkdown composition.
+(U)ltralight zettelkasten for (M)arkdown composition.
 
 Each subcommand has a --help | -h flag.
 
