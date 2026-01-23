@@ -60,8 +60,8 @@ func printFiles(w io.Writer, entries []Entry, tagmap map[string]Set, files Set, 
 	tags := fmt.Sprintln("[tags]")
 	otags := orderedTags(tagmap, query)
 	tsb := strings.Builder{}
-	// 20 * ' ' + '= 000' = 25
-	tsb.Grow(len(otags) * 25)
+	// 20 * ' ' + '= 000\n' = 26
+	tsb.Grow(len(otags) * 26)
 	for _, t := range otags {
 		tsb.WriteString(fmt.Sprintf("%-20s= %d\n", t.name, t.count))
 	}
@@ -70,8 +70,8 @@ func printFiles(w io.Writer, entries []Entry, tagmap map[string]Set, files Set, 
 	adj := fmt.Sprintln("[adjacencies]")
 	oadj := orderedTags(adjacencies, Query{WILD, []string{}})
 	asb := strings.Builder{}
-	// 20 * ' ' + '= 000 : 000' = 31
-	asb.Grow(len(oadj) * 31)
+	// 20 * ' ' + '= 000 : 000\n' = 32
+	asb.Grow(len(oadj) * 32)
 	for _, t := range oadj {
 		// TODO: something's fucky about these len() with --invert :
 		asb.WriteString(fmt.Sprintf("%-20s= %-3d : %d\n", t.name, t.count, len(tagmap[t.name])))
