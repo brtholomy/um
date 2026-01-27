@@ -15,6 +15,7 @@ type Flag interface {
 	Set(string)
 	Match(arg string, i, j int) bool
 	IsSet() bool
+	IsHelp() bool
 }
 
 type Arg struct {
@@ -48,6 +49,10 @@ func (f *Arg) IsSet() bool {
 	return f.Val != ""
 }
 
+func (f *Arg) IsHelp() bool {
+	return false
+}
+
 func (f *String) Set(val string) {
 	f.Val = val
 }
@@ -62,17 +67,24 @@ func (f *String) IsSet() bool {
 	return f.Val != ""
 }
 
+func (f *String) IsHelp() bool {
+	return false
+}
+
 func (f *Bool) Set(_ string) {
 	f.Val = true
 }
 
 func (f *Bool) Match(arg string, _, _ int) bool {
-	// TODO: catch --help
 	return arg == f.Long || arg == f.Short
 }
 
 func (f *Bool) IsSet() bool {
 	return f.Val
+}
+
+func (f *Bool) IsHelp() bool {
+	return f.Long == "--help"
 }
 
 func hasDashPrefix(s string) bool {
@@ -95,8 +107,11 @@ func validValueOrExit(sub cmd.Subcommand, args []string, i int) {
 // 1. validate a Flag[string] by looking ahead in args, if missing, os.Exit(1)
 // 2. increment the i to skip that value and return
 // 3. fetch that value and return
-func ValidateIncrementFetchOrExit(sub cmd.Subcommand, args []string, i int) (int, string) {
-	validValueOrExit(sub, args, i)
+func validateIncrementFetchOrExit(sub cmd.Subcommand, args []string, i int) (int, string) {
+	if missingValue(args, i) {
+		log.Printf("um %s: %s needs a value assignment\n", sub, args[i])
+		log.Fatal("try: um [cmd] --help")
+	}
 	return i + 1, args[i+1]
 }
 
@@ -140,6 +155,9 @@ argloop:
 	for i, arg := range args {
 		for j, f := range flags {
 			if f.Match(arg, i, j) {
+				if f.IsHelp() {
+					Help(sub, summary, opts)
+				}
 				f.Set(arg)
 				continue argloop
 			}
