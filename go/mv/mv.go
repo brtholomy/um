@@ -21,14 +21,14 @@ const (
 type options struct {
 	Filename   flags.Arg
 	Descriptor flags.Arg
-	Help       flags.Flag[bool]
+	Help       flags.Bool
 }
 
 func initOpts() options {
 	return options{
 		flags.Arg{"", "old filename"},
 		flags.Arg{"", "new descriptor"},
-		flags.Flag[bool]{"--help", "-h", false, "show help"},
+		flags.Bool{"--help", "-h", false, "show help"},
 	}
 }
 

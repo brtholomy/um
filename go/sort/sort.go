@@ -18,18 +18,18 @@ const (
 )
 
 type options struct {
-	Source flags.Flag[string]
-	Key    flags.Flag[string]
-	Write  flags.Flag[bool]
-	Help   flags.Flag[bool]
+	Source flags.String
+	Key    flags.String
+	Write  flags.Bool
+	Help   flags.Bool
 }
 
 func initOpts() options {
 	return options{
-		flags.Flag[string]{"--source", "-s", "", "path to source list. reads from stdin if omitted."},
-		flags.Flag[string]{"--key", "-k", "", "path to sort key"},
-		flags.Flag[bool]{"--write", "-w", false, "write sorted list back to --key file"},
-		flags.Flag[bool]{"--help", "-h", false, "show help"},
+		flags.String{"--source", "-s", "", "path to source list. reads from stdin if omitted."},
+		flags.String{"--key", "-k", "", "path to sort key"},
+		flags.Bool{"--write", "-w", false, "write sorted list back to --key file"},
+		flags.Bool{"--help", "-h", false, "show help"},
 	}
 }
 

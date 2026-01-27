@@ -15,19 +15,19 @@ const (
 
 type options struct {
 	Query   flags.Arg
-	Date    flags.Flag[string]
-	Invert  flags.Flag[bool]
-	Verbose flags.Flag[bool]
-	Help    flags.Flag[bool]
+	Date    flags.String
+	Invert  flags.Bool
+	Verbose flags.Bool
+	Help    flags.Bool
 }
 
 func initOpts() options {
 	return options{
 		flags.Arg{"", "tag query: understands intersection '+' and union ','"},
-		flags.Flag[string]{"--date", "-d", "", "date range in ISO 8601: YYYY.MM.DD[-YYYY.MM.DD]"},
-		flags.Flag[bool]{"--invert", "-i", false, "invert match"},
-		flags.Flag[bool]{"--verbose", "-v", false, "print a verbose summary"},
-		flags.Flag[bool]{"--help", "-h", false, "show help"},
+		flags.String{"--date", "-d", "", "date range in ISO 8601: YYYY.MM.DD[-YYYY.MM.DD]"},
+		flags.Bool{"--invert", "-i", false, "invert match"},
+		flags.Bool{"--verbose", "-v", false, "print a verbose summary"},
+		flags.Bool{"--help", "-h", false, "show help"},
 	}
 }
 
