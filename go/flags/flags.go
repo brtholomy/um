@@ -12,7 +12,7 @@ const INTERNAL_ERR_PREFIX = "um internal err: ParseArgs"
 
 // interface as func parameter
 type Flag interface {
-	Set(string)
+	SetValid(args []string, i int) (int, bool)
 	Match(arg string, i, j int) bool
 	IsSet() bool
 	IsHelp() bool
@@ -37,8 +37,9 @@ type Bool struct {
 	Help  string
 }
 
-func (f *Arg) Set(val string) {
-	f.Val = val
+func (f *Arg) SetValid(args []string, i int) (int, bool) {
+	f.Val = args[i]
+	return i, true
 }
 
 func (f *Arg) Match(arg string, i, j int) bool {
@@ -53,12 +54,12 @@ func (f *Arg) IsHelp() bool {
 	return false
 }
 
-func (f *String) Set(val string) {
+func (f *String) SetValid(args []string, i int) (int, bool) {
+	i, val, ok := validateIncrementFetch(args, i)
 	f.Val = val
+	return i, ok
 }
 
-// TODO: this should look ahead
-// i, fetch = ValidateIncrementFetchOrExit(sub, args, i)
 func (f *String) Match(arg string, _, _ int) bool {
 	return arg == f.Long || arg == f.Short
 }
@@ -71,8 +72,9 @@ func (f *String) IsHelp() bool {
 	return false
 }
 
-func (f *Bool) Set(_ string) {
+func (f *Bool) SetValid(_ []string, i int) (int, bool) {
 	f.Val = true
+	return i, true
 }
 
 func (f *Bool) Match(arg string, _, _ int) bool {
@@ -96,29 +98,21 @@ func missingValue(args []string, i int) bool {
 	return i+1 == len(args) || hasDashPrefix(args[i+1])
 }
 
-// if no value ahead in the args, print error and exit
-func validValueOrExit(sub cmd.Subcommand, args []string, i int) {
-	if missingValue(args, i) {
-		log.Printf("um %s: %s needs a value assignment\n", sub, args[i])
-		log.Fatal("try: um [cmd] --help")
-	}
-}
-
-// 1. validate a Flag[string] by looking ahead in args, if missing, os.Exit(1)
+// 1. validate a Flag[string] by looking ahead in args, if missing, return false
 // 2. increment the i to skip that value and return
 // 3. fetch that value and return
-func validateIncrementFetchOrExit(sub cmd.Subcommand, args []string, i int) (int, string) {
+func validateIncrementFetch(args []string, i int) (int, string, bool) {
 	if missingValue(args, i) {
-		log.Printf("um %s: %s needs a value assignment\n", sub, args[i])
-		log.Fatal("try: um [cmd] --help")
+		return 0, "", false
 	}
-	return i + 1, args[i+1]
+	return i + 1, args[i+1], true
 }
 
 // expand incoming opts struct into a []Flag
 //
 // WARN: incoming opts must be a pointer!
 // WORB: opts struct must list its Arg types first and in expected order
+// NOTE: uglier than the pretty switch statements I had per cmd, but much more convenient.
 func expandOpts(opts any) []Flag {
 	flags := []Flag{}
 	v := reflect.ValueOf(opts)
@@ -147,18 +141,22 @@ func expandOpts(opts any) []Flag {
 }
 
 // assign values of args to opts struct using Flag interface methods
-//
-// NOTE: uglier than the pretty switch statements I had per cmd, but much more convenient.
 func ParseArgs(sub cmd.Subcommand, summary string, args []string, opts any) {
 	flags := expandOpts(opts)
 argloop:
-	for i, arg := range args {
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
 		for j, f := range flags {
 			if f.Match(arg, i, j) {
 				if f.IsHelp() {
 					Help(sub, summary, opts)
 				}
-				f.Set(arg)
+				ok := false
+				i, ok = f.SetValid(args, i)
+				if !ok {
+					log.Printf("um %s: %s needs a value assignment\n", sub, args[i])
+					log.Fatal("try: um [cmd] --help")
+				}
 				continue argloop
 			}
 		}
