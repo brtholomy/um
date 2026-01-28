@@ -1,7 +1,6 @@
 package next
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -14,8 +13,9 @@ import (
 )
 
 const (
-	CMD     = cmd.Next
-	SUMMARY = "create the next um file and open with emacsclient"
+	CMD            = cmd.Next
+	SUMMARY        = "create the next um file and open with emacsclient"
+	NEXT_NUM_ERROR = "failed to find number in last file"
 )
 
 const FILE_REGEXP = `(?m)^([0-9]+)\.[^\.]*\.*md$`
@@ -42,7 +42,7 @@ func NumFromLast(l string) (string, error) {
 	res := fileRegexp.FindStringSubmatch(l)
 	num := ""
 	if len(res) < 2 {
-		return num, errors.New(last.NOT_FOUND_MSG)
+		return num, fmt.Errorf("%s: %s", NEXT_NUM_ERROR, l)
 	}
 	num = res[1]
 	return num, nil
