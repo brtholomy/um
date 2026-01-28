@@ -18,7 +18,7 @@ const (
 	SUMMARY = "create the next um file and open with emacsclient"
 )
 
-const FILE_REGEXP = `(?m)^([0-9]+)\.[[:alpha:]]*\.*md$`
+const FILE_REGEXP = `(?m)^([0-9]+)\.[^\.]*\.*md$`
 
 var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
 
