@@ -154,9 +154,8 @@ func expandOpts(opts any) []Flag {
 	return flags
 }
 
-// assign values of args to opts struct using Flag interface methods
-func ParseArgs(sub cmd.Subcommand, summary string, args []string, opts any) {
-	flags := expandOpts(opts)
+// internal for type safety testing
+func parseArgsInternal(sub cmd.Subcommand, summary string, args []string, opts any, flags []Flag) {
 argloop:
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
@@ -177,4 +176,10 @@ argloop:
 		HelpInvalidArg(sub, arg)
 		Help(sub, summary, opts)
 	}
+}
+
+// assign values of args to opts struct using Flag interface methods
+func ParseArgs(sub cmd.Subcommand, summary string, args []string, opts any) {
+	flags := expandOpts(opts)
+	parseArgsInternal(sub, summary, args, opts, flags)
 }
