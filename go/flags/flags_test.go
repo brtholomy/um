@@ -11,6 +11,8 @@ const (
 	SUMMARY = "SUMMARY"
 )
 
+var helpErr = NewHelpError(CMD, SUMMARY)
+
 type options struct {
 	Descriptor Arg
 	Tags       Arg
@@ -38,7 +40,7 @@ func TestParseArgsInternal(t *testing.T) {
 		&Bool{"--help", "-h", false, "show help"},
 	}
 	args := []string{"--source", "foo"}
-	parseArgsInternal(CMD, SUMMARY, args, initOpts(), flags)
+	parseArgsInternal(helpErr, args, initOpts(), flags)
 	assert.False(t, flags[0].IsSet())
 	assert.False(t, flags[0].IsHelp())
 	assert.True(t, flags[2].IsSet())
@@ -49,7 +51,7 @@ func TestParseArgsInternal(t *testing.T) {
 func TestParseArgsHelp(t *testing.T) {
 	args := []string{"--help"}
 	opts := initOpts()
-	err := ParseArgs(CMD, SUMMARY, args, &opts)
+	err := ParseArgs(helpErr, args, &opts)
 	assert.ErrorContains(t, err, "um TEST [descriptor] [tags] [--source] [--write]\n\nSUMMARY")
 	// we set the Val true although we don't expect to use it:
 	assert.True(t, opts.Help.Val)
@@ -58,7 +60,7 @@ func TestParseArgsHelp(t *testing.T) {
 func TestParseArgsString(t *testing.T) {
 	args := []string{"--source", "foo"}
 	opts := initOpts()
-	err := ParseArgs(CMD, SUMMARY, args, &opts)
+	err := ParseArgs(helpErr, args, &opts)
 	assert.NoError(t, err)
 	assert.Equal(t, opts.Source.Val, "foo")
 }
@@ -82,7 +84,7 @@ func TestParseArgs(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ParseArgs(CMD, SUMMARY, tc.args, &opts)
+			err := ParseArgs(helpErr, tc.args, &opts)
 			assert.NoError(t, err)
 			if tc.boolVal != nil {
 				assert.True(t, *tc.boolVal)

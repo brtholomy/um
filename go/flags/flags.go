@@ -4,8 +4,6 @@ import (
 	"log"
 	"reflect"
 	"strings"
-
-	"github.com/brtholomy/um/go/cmd"
 )
 
 const INTERNAL_ERR_PREFIX = "um internal err: ParseArgs"
@@ -155,7 +153,10 @@ func expandOpts(opts any) []Flag {
 }
 
 // internal for type safety testing
-func parseArgsInternal(sub cmd.Subcommand, summary string, args []string, opts any, flags []Flag) error {
+//
+// NOTE: we aren't currently returning any other kind of error, so keeping HelpError as error type
+// may be unnecessary, although it allows another err eventually.
+func parseArgsInternal(help HelpError, args []string, opts any, flags []Flag) error {
 argloop:
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
@@ -164,10 +165,10 @@ argloop:
 				if f.IsHelp() {
 					// so Help.Val is true to avoid confusion:
 					f.Set(arg)
-					return Help(sub, summary, opts)
+					return help.Help(opts)
 				}
 				if !f.Valid(args, i) {
-					return HelpMissingAssignment(sub, arg)
+					return help.HelpMissingAssignment(arg)
 				}
 				i = f.MaybeIncrement(i)
 				f.Set(args[i])
@@ -175,13 +176,13 @@ argloop:
 			}
 		}
 		// NOTE: if we didn't skip ahead, arg didn't match:
-		return HelpInvalidArg(sub, arg)
+		return help.HelpInvalidArg(arg)
 	}
 	return nil
 }
 
 // assign values of args to opts struct using Flag interface methods
-func ParseArgs(sub cmd.Subcommand, summary string, args []string, opts any) error {
+func ParseArgs(help HelpError, args []string, opts any) error {
 	flags := expandOpts(opts)
-	return parseArgsInternal(sub, summary, args, opts, flags)
+	return parseArgsInternal(help, args, opts, flags)
 }

@@ -11,6 +11,8 @@ import (
 )
 
 type HelpError struct {
+	sub     cmd.Subcommand
+	summary string
 	message string
 }
 
@@ -18,27 +20,30 @@ func (h HelpError) Error() string {
 	return h.message
 }
 
-func HelpRequired(sub cmd.Subcommand, long string) error {
-	return HelpError{
-		fmt.Sprintf("um %s: %s is required", sub, long),
-	}
+// TODO: is this odd? Constructing an error at the callsite and passing it down and back up?
+// but how else should I fill out its fields to be reused later?
+func NewHelpError(sub cmd.Subcommand, summary string) HelpError {
+	return HelpError{sub, summary, ""}
 }
 
-func HelpInvalidArg(sub cmd.Subcommand, arg string) error {
-	return HelpError{
-		fmt.Sprintf("um %s: invalid argument: %s", sub, arg),
-	}
+func (h HelpError) HelpRequired(long string) error {
+	h.message = fmt.Sprintf("um %s: %s is required", h.sub, long)
+	return h
 }
 
-func HelpMissingAssignment(sub cmd.Subcommand, arg string) error {
-	return HelpError{
-		fmt.Sprintf("um %s: %s needs a value assignment", sub, arg),
-	}
+func (h HelpError) HelpInvalidArg(arg string) error {
+	h.message = fmt.Sprintf("um %s: invalid argument: %s", h.sub, arg)
+	return h
+
 }
 
-// print out help string by reflecting over fields of provided opts struct
-// and os.Exit(0)
-func Help(sub cmd.Subcommand, summary string, opts any) error {
+func (h HelpError) HelpMissingAssignment(arg string) error {
+	h.message = fmt.Sprintf("um %s: %s needs a value assignment", h.sub, arg)
+	return h
+}
+
+// assemble --help string by reflecting over fields of provided opts struct
+func (h HelpError) Help(opts any) error {
 	v := reflect.ValueOf(opts)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -68,9 +73,10 @@ func Help(sub cmd.Subcommand, summary string, opts any) error {
 			)
 		}
 	}
-	if _, err := buf.WriteString(fmt.Sprintf("um %s%s\n\n%s\n\n", sub, positional, summary)); err != nil {
+	if _, err := buf.WriteString(fmt.Sprintf("um %s%s\n\n%s\n\n", h.sub, positional, h.summary)); err != nil {
 		return err
 	}
 	w.Flush()
-	return HelpError{buf.String()}
+	h.message = buf.String()
+	return h
 }

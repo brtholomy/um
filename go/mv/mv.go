@@ -90,7 +90,8 @@ func mv(opts options) error {
 
 func Mv(args []string) {
 	opts := initOpts()
-	if err := flags.ParseArgs(CMD, SUMMARY, args, &opts); err != nil {
+	help := flags.NewHelpError(CMD, SUMMARY)
+	if err := flags.ParseArgs(help, args, &opts); err != nil {
 		var herr flags.HelpError
 		if errors.As(err, &herr) {
 			fmt.Println(herr)

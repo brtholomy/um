@@ -70,7 +70,8 @@ func write(file string, content string) {
 
 func Sort(args []string) {
 	opts := initOpts()
-	if err := flags.ParseArgs(CMD, SUMMARY, args, &opts); err != nil {
+	help := flags.NewHelpError(CMD, SUMMARY)
+	if err := flags.ParseArgs(help, args, &opts); err != nil {
 		var herr flags.HelpError
 		if errors.As(err, &herr) {
 			fmt.Println(herr)
@@ -80,7 +81,7 @@ func Sort(args []string) {
 	}
 	// BORK: by hand for now:
 	if !opts.Key.IsSet() {
-		fmt.Println(flags.HelpRequired(CMD, opts.Key.Long))
+		fmt.Println(help.HelpRequired(opts.Key.Long))
 		return
 	}
 
