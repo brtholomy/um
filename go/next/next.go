@@ -25,14 +25,14 @@ var fileRegexp *regexp.Regexp = regexp.MustCompile(FILE_REGEXP)
 type options struct {
 	Descriptor flags.Arg
 	Tags       flags.Arg
-	Help       flags.Flag[bool]
+	Help       flags.Bool
 }
 
 func initOpts() options {
 	return options{
 		flags.Arg{"", "midfix file descriptor"},
 		flags.Arg{"", "tags to add to new file"},
-		flags.Flag[bool]{"--help", "-h", false, "show help"},
+		flags.Bool{"--help", "-h", false, "show help"},
 	}
 }
 

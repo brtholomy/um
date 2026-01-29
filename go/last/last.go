@@ -22,12 +22,12 @@ const (
 )
 
 type options struct {
-	Help flags.Flag[bool]
+	Help flags.Bool
 }
 
 func initOpts() options {
 	return options{
-		flags.Flag[bool]{"--help", "-h", false, "show help"},
+		flags.Bool{"--help", "-h", false, "show help"},
 	}
 }
 

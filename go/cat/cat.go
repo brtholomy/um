@@ -22,19 +22,19 @@ const (
 
 type options struct {
 	Filelist   flags.Arg
-	Base       flags.Flag[string]
-	KeepHeader flags.Flag[bool]
-	KeepTitle  flags.Flag[bool]
-	Help       flags.Flag[bool]
+	Base       flags.String
+	KeepHeader flags.Bool
+	KeepTitle  flags.Bool
+	Help       flags.Bool
 }
 
 func initOpts() options {
 	return options{
 		flags.Arg{"", "filelist. accepts from stdin if not provided"},
-		flags.Flag[string]{"--base", "-b", "", "base directory prepended to files in filelist"},
-		flags.Flag[bool]{"--keep-header", "-d", false, "preserve um headers in concatenated file. overrides --keep-title"},
-		flags.Flag[bool]{"--keep-title", "-t", false, "preserve um titles in concatenated file"},
-		flags.Flag[bool]{"--help", "-h", false, "show help"},
+		flags.String{"--base", "-b", "", "base directory prepended to files in filelist"},
+		flags.Bool{"--keep-header", "-d", false, "preserve um headers in concatenated file. overrides --keep-title"},
+		flags.Bool{"--keep-title", "-t", false, "preserve um titles in concatenated file"},
+		flags.Bool{"--help", "-h", false, "show help"},
 	}
 }
 
