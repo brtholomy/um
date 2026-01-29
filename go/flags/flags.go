@@ -1,12 +1,20 @@
 package flags
 
 import (
-	"log"
+	"fmt"
 	"reflect"
 	"strings"
 )
 
-const INTERNAL_ERR_PREFIX = "um internal err: ParseArgs"
+const PARSE_ERROR_PREFIX = "internal err: ParseArgs"
+
+type ParseError struct {
+	message string
+}
+
+func (pe ParseError) Error() string {
+	return fmt.Sprintf("%s: %s", PARSE_ERROR_PREFIX, pe.message)
+}
 
 // interface as func parameter
 type Flag interface {
@@ -123,39 +131,36 @@ func missingValue(args []string, i int) bool {
 // WARN: incoming opts must be a pointer!
 // WORB: opts struct must list its Arg types first and in expected order
 // NOTE: uglier than the pretty switch statements I had per cmd, but much more convenient.
-func expandOpts(opts any) []Flag {
+func expandOpts(opts any) ([]Flag, error) {
 	flags := []Flag{}
 	v := reflect.ValueOf(opts)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	} else {
-		log.Fatalf("%s needs a pointer to a struct: %#v", INTERNAL_ERR_PREFIX, opts)
+		return nil, ParseError{fmt.Sprintf("needs a pointer to a struct: %#v", opts)}
 	}
 	if v.Kind() != reflect.Struct {
-		log.Fatalf("%s needs an underlying struct: %#v", INTERNAL_ERR_PREFIX, opts)
+		return nil, ParseError{fmt.Sprintf("needs an underlying struct: %#v", opts)}
 	}
 	for j := 0; j < v.NumField(); j++ {
 		field := v.Field(j)
 		if field.Kind() != reflect.Struct {
-			log.Fatalf("%s needs a struct: %s", INTERNAL_ERR_PREFIX, field.Kind())
+			return nil, ParseError{fmt.Sprintf("needs a struct: %#v", field.Kind())}
 		}
 		if !field.CanAddr() {
-			log.Fatalf("%s needs an addressable type: %s", INTERNAL_ERR_PREFIX, field.Type())
+			return nil, ParseError{fmt.Sprintf("needs an addressable type: %#v", field.Type())}
 		}
 		// NOTE: Addr() gets the underlying address:
 		if f, ok := field.Addr().Interface().(Flag); ok {
 			flags = append(flags, f)
 		} else {
-			log.Fatalf("%s needs a []Flag interface: %s", INTERNAL_ERR_PREFIX, field.Type())
+			return nil, ParseError{fmt.Sprintf("needs a []Flag interface: %#v", field.Type())}
 		}
 	}
-	return flags
+	return flags, nil
 }
 
 // internal for type safety testing
-//
-// NOTE: we aren't currently returning any other kind of error, so keeping HelpError as error type
-// may be unnecessary, although it allows another err eventually.
 func parseArgsInternal(help HelpError, args []string, opts any, flags []Flag) error {
 argloop:
 	for i := 0; i < len(args); i++ {
@@ -183,6 +188,9 @@ argloop:
 
 // assign values of args to opts struct using Flag interface methods
 func ParseArgs(help HelpError, args []string, opts any) error {
-	flags := expandOpts(opts)
+	flags, err := expandOpts(opts)
+	if err != nil {
+		return err
+	}
 	return parseArgsInternal(help, args, opts, flags)
 }

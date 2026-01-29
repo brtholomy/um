@@ -48,6 +48,9 @@ func (h HelpError) Help(opts any) error {
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
+	if v.Kind() != reflect.Struct {
+		return ParseError{fmt.Sprintf("needs an underlying struct: %#v", opts)}
+	}
 	t := v.Type()
 
 	buf := &bytes.Buffer{}
@@ -55,28 +58,33 @@ func (h HelpError) Help(opts any) error {
 	positional := ""
 
 	for i := 0; i < v.NumField(); i++ {
-		field := t.Field(i)
-		value := v.Field(i)
-		switch value.Interface().(type) {
+		tField := t.Field(i)
+		vField := v.Field(i)
+		switch vField.Interface().(type) {
 		case Arg:
-			positional += fmt.Sprintf(" [%s]", strings.ToLower(field.Name))
-			fmt.Fprintf(w, "[%v]\tstring\t%v\n", strings.ToLower(field.Name), value.FieldByName("Help"))
+			positional += fmt.Sprintf(" [%s]", strings.ToLower(tField.Name))
+			fmt.Fprintf(w, "[%v]\tstring\t%v\n", strings.ToLower(tField.Name), vField.FieldByName("Help"))
 		case String, Bool:
-			if field.Name != "Help" {
-				positional += fmt.Sprintf(" [%s]", value.FieldByName("Long"))
+			if tField.Name != "Help" {
+				positional += fmt.Sprintf(" [%s]", vField.FieldByName("Long"))
 			}
 			fmt.Fprintf(w, "%v | %v\t%v\t%v\n",
-				value.FieldByName("Long"),
-				value.FieldByName("Short"),
-				value.FieldByName("Val").Type(),
-				value.FieldByName("Help"),
+				vField.FieldByName("Long"),
+				vField.FieldByName("Short"),
+				vField.FieldByName("Val").Type(),
+				vField.FieldByName("Help"),
 			)
+		default:
+			return ParseError{fmt.Sprintf("needs a []Flag interface: %#v", vField.Type())}
+
 		}
 	}
 	if _, err := buf.WriteString(fmt.Sprintf("um %s%s\n\n%s\n\n", h.sub, positional, h.summary)); err != nil {
 		return err
 	}
-	w.Flush()
+	if err := w.Flush(); err != nil {
+		return err
+	}
 	h.message = buf.String()
 	return h
 }
