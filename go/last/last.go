@@ -48,9 +48,8 @@ func Last(args []string) {
 	opts := initOpts()
 	help := flags.NewHelpError(CMD, SUMMARY)
 	if err := flags.ParseArgs(help, args, &opts); err != nil {
-		var herr flags.HelpError
-		if errors.As(err, &herr) {
-			fmt.Println(herr)
+		if errors.As(err, &help) {
+			fmt.Println(help)
 			return
 		}
 		log.Fatalf("um %s: %s", CMD, err)
