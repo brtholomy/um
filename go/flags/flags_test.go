@@ -57,6 +57,35 @@ func TestParseArgsHelp(t *testing.T) {
 	assert.True(t, opts.Help.Val)
 }
 
+func TestExpandOpts(t *testing.T) {
+	opts := initOpts()
+	flags, err := expandOpts(&opts)
+	assert.NoError(t, err)
+	assert.Equal(t, &opts.Descriptor, flags[0])
+	assert.Equal(t, &opts.Tags, flags[1])
+	assert.Equal(t, &opts.Source, flags[2])
+	assert.Equal(t, &opts.Write, flags[3])
+	assert.Equal(t, &opts.Help, flags[4])
+}
+
+func TestExpandOptsNeedsPointer(t *testing.T) {
+	opts := initOpts()
+	_, err := expandOpts(opts)
+	assert.ErrorContains(t, err, "needs a pointer to a struct")
+	err = ParseArgs(helpErr, nil, opts)
+	assert.ErrorContains(t, err, "needs a pointer to a struct")
+}
+
+func TestExpandOptsNeedsStruct(t *testing.T) {
+	badOpts := struct {
+		bar string
+		foo bool
+	}{"bar", false}
+
+	_, err := expandOpts(&badOpts)
+	assert.ErrorContains(t, err, "field must be a struct")
+}
+
 func TestParseArgsString(t *testing.T) {
 	args := []string{"--source", "foo"}
 	opts := initOpts()

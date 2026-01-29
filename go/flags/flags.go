@@ -145,16 +145,16 @@ func expandOpts(opts any) ([]Flag, error) {
 	for j := 0; j < v.NumField(); j++ {
 		field := v.Field(j)
 		if field.Kind() != reflect.Struct {
-			return nil, ParseError{fmt.Sprintf("needs a struct: %#v", field.Kind())}
+			return nil, ParseError{fmt.Sprintf("field must be a struct: %#v", field.Kind())}
 		}
 		if !field.CanAddr() {
-			return nil, ParseError{fmt.Sprintf("needs an addressable type: %#v", field.Type())}
+			return nil, ParseError{fmt.Sprintf("field must be addressable type: %#v", field.Type())}
 		}
 		// NOTE: Addr() gets the underlying address:
 		if f, ok := field.Addr().Interface().(Flag); ok {
 			flags = append(flags, f)
 		} else {
-			return nil, ParseError{fmt.Sprintf("needs a []Flag interface: %#v", field.Type())}
+			return nil, ParseError{fmt.Sprintf("field must be a []Flag interface: %#v", field.Type())}
 		}
 	}
 	return flags, nil
