@@ -12,8 +12,10 @@ const INTERNAL_ERR_PREFIX = "um internal err: ParseArgs"
 
 // interface as func parameter
 type Flag interface {
-	SetValid(args []string, i int) (int, bool)
-	Match(arg string, i, j int) bool
+	Set(string)
+	Valid([]string, int) bool
+	MaybeIncrement(int) int
+	Match(string, int, int) bool
 	IsSet() bool
 	IsHelp() bool
 }
@@ -37,9 +39,12 @@ type Bool struct {
 	Help  string
 }
 
-func (f *Arg) SetValid(args []string, i int) (int, bool) {
-	f.Val = args[i]
-	return i, true
+func (f *Arg) Set(arg string) {
+	f.Val = arg
+}
+
+func (f *Arg) Valid(args []string, i int) bool {
+	return true
 }
 
 func (f *Arg) Match(arg string, i, j int) bool {
@@ -54,10 +59,20 @@ func (f *Arg) IsHelp() bool {
 	return false
 }
 
-func (f *String) SetValid(args []string, i int) (int, bool) {
-	i, val, ok := validateIncrementFetch(args, i)
-	f.Val = val
-	return i, ok
+func (f *Arg) MaybeIncrement(i int) int {
+	return i
+}
+
+func (f *String) Set(arg string) {
+	f.Val = arg
+}
+
+func (f *String) Valid(args []string, i int) bool {
+	return !missingValue(args, i)
+}
+
+func (f *String) MaybeIncrement(i int) int {
+	return i + 1
 }
 
 func (f *String) Match(arg string, _, _ int) bool {
@@ -72,13 +87,20 @@ func (f *String) IsHelp() bool {
 	return false
 }
 
-func (f *Bool) SetValid(_ []string, i int) (int, bool) {
+func (f *Bool) Set(arg string) {
 	f.Val = true
-	return i, true
 }
 
 func (f *Bool) Match(arg string, _, _ int) bool {
 	return arg == f.Long || arg == f.Short
+}
+
+func (f *Bool) Valid(args []string, i int) bool {
+	return true
+}
+
+func (f *Bool) MaybeIncrement(i int) int {
+	return i
 }
 
 func (f *Bool) IsSet() bool {
@@ -96,16 +118,6 @@ func hasDashPrefix(s string) bool {
 // check for non-dashed value ahead in the args slice
 func missingValue(args []string, i int) bool {
 	return i+1 == len(args) || hasDashPrefix(args[i+1])
-}
-
-// 1. validate a Flag[string] by looking ahead in args, if missing, return false
-// 2. increment the i to skip that value and return
-// 3. fetch that value and return
-func validateIncrementFetch(args []string, i int) (int, string, bool) {
-	if missingValue(args, i) {
-		return 0, "", false
-	}
-	return i + 1, args[i+1], true
 }
 
 // expand incoming opts struct into a []Flag
@@ -130,11 +142,13 @@ func expandOpts(opts any) []Flag {
 			log.Fatalf("%s needs a struct: %s", INTERNAL_ERR_PREFIX, field.Kind())
 		}
 		if !field.CanAddr() {
-			log.Fatalf("%s needs an addressable type: ", INTERNAL_ERR_PREFIX, field.Type())
+			log.Fatalf("%s needs an addressable type: %s", INTERNAL_ERR_PREFIX, field.Type())
 		}
 		// NOTE: Addr() gets the underlying address:
 		if f, ok := field.Addr().Interface().(Flag); ok {
 			flags = append(flags, f)
+		} else {
+			log.Fatalf("%s needs a []Flag interface: %s", INTERNAL_ERR_PREFIX, field.Type())
 		}
 	}
 	return flags
@@ -151,12 +165,11 @@ argloop:
 				if f.IsHelp() {
 					Help(sub, summary, opts)
 				}
-				ok := false
-				i, ok = f.SetValid(args, i)
-				if !ok {
-					log.Printf("um %s: %s needs a value assignment\n", sub, args[i])
-					log.Fatal("try: um [cmd] --help")
+				if !f.Valid(args, i) {
+					HelpMissingAssignment(sub, arg)
 				}
+				i = f.MaybeIncrement(i)
+				f.Set(args[i])
 				continue argloop
 			}
 		}

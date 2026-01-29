@@ -19,6 +19,11 @@ func HelpInvalidArg(sub cmd.Subcommand, arg string) {
 	log.Printf("um %s: invalid argument: %s", sub, arg)
 }
 
+func HelpMissingAssignment(sub cmd.Subcommand, arg string) {
+	log.Printf("um %s: %s needs a value assignment\n", sub, arg)
+	log.Fatal("try: um [cmd] --help")
+}
+
 // print out help string by reflecting over fields of provided opts struct
 // and os.Exit(0)
 func Help(sub cmd.Subcommand, summary string, opts any) {
