@@ -1,9 +1,8 @@
 package flags
 
 import (
+	"bytes"
 	"fmt"
-	"log"
-	"os"
 	"reflect"
 	"strings"
 	"text/tabwriter"
@@ -11,30 +10,43 @@ import (
 	"github.com/brtholomy/um/go/cmd"
 )
 
-func HelpRequired(sub cmd.Subcommand, long string) {
-	log.Printf("um %s: %s is required", sub, long)
+type HelpError struct {
+	message string
 }
 
-func HelpInvalidArg(sub cmd.Subcommand, arg string) {
-	log.Printf("um %s: invalid argument: %s", sub, arg)
+func (h HelpError) Error() string {
+	return h.message
 }
 
-func HelpMissingAssignment(sub cmd.Subcommand, arg string) {
-	log.Printf("um %s: %s needs a value assignment\n", sub, arg)
-	log.Fatal("try: um [cmd] --help")
+func HelpRequired(sub cmd.Subcommand, long string) error {
+	return HelpError{
+		fmt.Sprintf("um %s: %s is required", sub, long),
+	}
+}
+
+func HelpInvalidArg(sub cmd.Subcommand, arg string) error {
+	return HelpError{
+		fmt.Sprintf("um %s: invalid argument: %s", sub, arg),
+	}
+}
+
+func HelpMissingAssignment(sub cmd.Subcommand, arg string) error {
+	return HelpError{
+		fmt.Sprintf("um %s: %s needs a value assignment", sub, arg),
+	}
 }
 
 // print out help string by reflecting over fields of provided opts struct
 // and os.Exit(0)
-func Help(sub cmd.Subcommand, summary string, opts any) {
+func Help(sub cmd.Subcommand, summary string, opts any) error {
 	v := reflect.ValueOf(opts)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
 	}
 	t := v.Type()
 
-	// everything should go to either stderr or stdout:
-	w := tabwriter.NewWriter(os.Stderr, 0, 0, 3, ' ', 0)
+	buf := &bytes.Buffer{}
+	w := tabwriter.NewWriter(buf, 0, 0, 3, ' ', 0)
 	positional := ""
 
 	for i := 0; i < v.NumField(); i++ {
@@ -56,8 +68,9 @@ func Help(sub cmd.Subcommand, summary string, opts any) {
 			)
 		}
 	}
-	log.Printf("um %s%s\n\n", sub, positional)
-	log.Printf("%s\n\n", summary)
+	if _, err := buf.WriteString(fmt.Sprintf("um %s%s\n\n%s\n\n", sub, positional, summary)); err != nil {
+		return err
+	}
 	w.Flush()
-	os.Exit(0)
+	return HelpError{buf.String()}
 }

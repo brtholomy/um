@@ -46,7 +46,14 @@ func GlobLast(glob string) (string, error) {
 
 func Last(args []string) {
 	opts := initOpts()
-	flags.ParseArgs(CMD, SUMMARY, args, &opts)
+	if err := flags.ParseArgs(CMD, SUMMARY, args, &opts); err != nil {
+		var herr flags.HelpError
+		if errors.As(err, &herr) {
+			fmt.Println(herr)
+			return
+		}
+		log.Fatalf("um %s: %s", CMD, err)
+	}
 
 	s, err := GlobLast(GLOB)
 	if err != nil {

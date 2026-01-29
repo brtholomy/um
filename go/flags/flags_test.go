@@ -46,11 +46,20 @@ func TestParseArgsInternal(t *testing.T) {
 
 }
 
-// TODO: return errors from Help routines and print at top level, so I can test those cases
+func TestParseArgsHelp(t *testing.T) {
+	args := []string{"--help"}
+	opts := initOpts()
+	err := ParseArgs(CMD, SUMMARY, args, &opts)
+	assert.ErrorContains(t, err, "um TEST [descriptor] [tags] [--source] [--write]\n\nSUMMARY")
+	// we set the Val true although we don't expect to use it:
+	assert.True(t, opts.Help.Val)
+}
+
 func TestParseArgsString(t *testing.T) {
 	args := []string{"--source", "foo"}
 	opts := initOpts()
-	ParseArgs(CMD, SUMMARY, args, &opts)
+	err := ParseArgs(CMD, SUMMARY, args, &opts)
+	assert.NoError(t, err)
 	assert.Equal(t, opts.Source.Val, "foo")
 }
 
@@ -73,7 +82,8 @@ func TestParseArgs(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			ParseArgs(CMD, SUMMARY, tc.args, &opts)
+			err := ParseArgs(CMD, SUMMARY, tc.args, &opts)
+			assert.NoError(t, err)
 			if tc.boolVal != nil {
 				assert.True(t, *tc.boolVal)
 			}

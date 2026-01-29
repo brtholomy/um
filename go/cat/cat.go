@@ -1,6 +1,7 @@
 package cat
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -82,7 +83,14 @@ func cat(files []string, opts options) (string, error) {
 
 func Cat(args []string) {
 	opts := initOpts()
-	flags.ParseArgs(CMD, SUMMARY, args, &opts)
+	if err := flags.ParseArgs(CMD, SUMMARY, args, &opts); err != nil {
+		var herr flags.HelpError
+		if errors.As(err, &herr) {
+			fmt.Println(herr)
+			return
+		}
+		log.Fatalf("um %s: %s", CMD, err)
+	}
 	files, err := pipe.FileListSplitMaybeStdin(opts.Filelist.Val)
 	if err != nil {
 		log.Fatalf("um %s: %s", CMD, err)

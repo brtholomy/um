@@ -1,6 +1,9 @@
 package tag
 
 import (
+	"errors"
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/brtholomy/um/go/cmd"
@@ -33,7 +36,14 @@ func initOpts() options {
 
 func Tag(args []string) {
 	opts := initOpts()
-	flags.ParseArgs(CMD, SUMMARY, args, &opts)
+	if err := flags.ParseArgs(CMD, SUMMARY, args, &opts); err != nil {
+		var herr flags.HelpError
+		if errors.As(err, &herr) {
+			fmt.Println(herr)
+			return
+		}
+		log.Fatalf("um %s: %s", CMD, err)
+	}
 
 	queries := parseQuery(opts.Query.Val)
 	entries := entriesGlobOrStdin(last.GLOB)

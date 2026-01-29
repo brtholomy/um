@@ -155,17 +155,19 @@ func expandOpts(opts any) []Flag {
 }
 
 // internal for type safety testing
-func parseArgsInternal(sub cmd.Subcommand, summary string, args []string, opts any, flags []Flag) {
+func parseArgsInternal(sub cmd.Subcommand, summary string, args []string, opts any, flags []Flag) error {
 argloop:
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 		for j, f := range flags {
 			if f.Match(arg, i, j) {
 				if f.IsHelp() {
-					Help(sub, summary, opts)
+					// so Help.Val is true to avoid confusion:
+					f.Set(arg)
+					return Help(sub, summary, opts)
 				}
 				if !f.Valid(args, i) {
-					HelpMissingAssignment(sub, arg)
+					return HelpMissingAssignment(sub, arg)
 				}
 				i = f.MaybeIncrement(i)
 				f.Set(args[i])
@@ -173,13 +175,13 @@ argloop:
 			}
 		}
 		// NOTE: if we didn't skip ahead, arg didn't match:
-		HelpInvalidArg(sub, arg)
-		Help(sub, summary, opts)
+		return HelpInvalidArg(sub, arg)
 	}
+	return nil
 }
 
 // assign values of args to opts struct using Flag interface methods
-func ParseArgs(sub cmd.Subcommand, summary string, args []string, opts any) {
+func ParseArgs(sub cmd.Subcommand, summary string, args []string, opts any) error {
 	flags := expandOpts(opts)
-	parseArgsInternal(sub, summary, args, opts, flags)
+	return parseArgsInternal(sub, summary, args, opts, flags)
 }

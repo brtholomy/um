@@ -1,6 +1,7 @@
 package next
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os/exec"
@@ -99,8 +100,14 @@ func emacsNext(f string, tags string) error {
 
 func Next(args []string) {
 	opts := initOpts()
-	flags.ParseArgs(CMD, SUMMARY, args, &opts)
-
+	if err := flags.ParseArgs(CMD, SUMMARY, args, &opts); err != nil {
+		var herr flags.HelpError
+		if errors.As(err, &herr) {
+			fmt.Println(herr)
+			return
+		}
+		log.Fatalf("um %s: %s", CMD, err)
+	}
 	l, err := last.GlobLast(last.GLOB)
 	if err != nil {
 		log.Fatalf("um %s: %v", CMD, err)
