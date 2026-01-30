@@ -25,16 +25,17 @@ https://github.com/brtholomy/um
 `, helpShort)
 
 func main() {
-	// NOTE: no prefix at all so that I can use log.Fatalf
+	// NOTE: no prefix at all so that I can use log alongside fmt
+	// log : stderr : exit status 1
+	// fmt : stdout : exit status 0
 	log.SetFlags(0)
 
-	// TODO: do something useful:
-	// run empty tag query?
 	if len(os.Args) < 2 {
 		log.Fatalln(helpShort)
 	}
 
 	arg := cmd.Subcommand(os.Args[1])
+	// NOTE: just pass what's relevant:
 	args := os.Args[2:]
 
 	switch arg {
@@ -51,7 +52,7 @@ func main() {
 	case cmd.Mv:
 		mv.Mv(args)
 	case cmd.Help:
-		log.Fatalln(helpLong)
+		fmt.Println(helpLong)
 	default:
 		log.Println("um: command not found")
 		log.Fatalln(helpShort)
