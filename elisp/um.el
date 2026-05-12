@@ -36,6 +36,7 @@
 ;; `um-tag-dwim': insert or delete a tag in dired and other contexts.
 
 (require 'project)
+(require 'um-mode)
 
 (defcustom um-root-glob ".*/writing/journal"
   "Primary glob for `um-root-path.' This allows various mountpoints."
