@@ -14,17 +14,20 @@
 ;; we can prefill it:
 (defvar-keymap um-mode-map
   :doc "Keymap for um-mode."
+  "n" 'next-line
+  "p" 'previous-line
   "M-p" 'um-drag-stuff-up
   "M-n" 'um-drag-stuff-down
   "M-k" 'um-kill-line
   "t" 'um-tag-dwim-inhibit-read-only
   )
 
-(define-derived-mode um-mode view-mode "um-mode"
-  "major mode for *.um file lists. Mostly `view-mode' with a few special commands.
+(define-derived-mode um-mode special-mode "um-mode"
+  "major mode for *.um file lists. Mostly `special-mode' with a few more commands.
 
 \\{um-mode-map}
 "
+  (read-only-mode)
   (setq-local mode-line-show-line-column nil)
   )
 
