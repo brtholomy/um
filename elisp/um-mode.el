@@ -28,7 +28,6 @@
 \\{um-mode-map}
 "
   (read-only-mode)
-  (setq-local mode-line-show-line-column nil)
   )
 
 ;;;###autoload
