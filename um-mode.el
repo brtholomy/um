@@ -22,6 +22,7 @@
   "t" 'um-tag-dwim-inhibit-read-only
   )
 
+;;;###autoload
 (define-derived-mode um-mode special-mode "um-mode"
   "major mode for *.um file lists. Mostly `special-mode' with a few more commands.
 
@@ -29,8 +30,5 @@
 "
   (read-only-mode)
   )
-
-;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.um\\'" . um-mode))
 
 (provide 'um-mode)

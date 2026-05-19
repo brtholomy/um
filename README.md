@@ -43,32 +43,13 @@ This "database" depends on a few simple ideas:
 
 # installation
 
-Clone it:
-
-```sh
-git clone https://github.com/brtholomy/um.git ~/.emacs.d/um
-```
-
-Build the `um` binary:
-
-```sh
-cd ~/.emacs.d/um/go
-go build -o um .
-```
-
-Symlink somewhere in your `PATH`:
-
-```sh
-ln -s ~/.emacs.d/um/go/um /usr/local/bin/um
-```
-
-## config
-
-My config looks like this:
+Install with use-package:
 
 ```elisp
 (use-package um
-  :after (project embark)
+  :vc (:url "https://github.com/brtholomy/um" :rev :newest)
+  :after (markdown-mode embark)
+  :mode ("\\.um\\'" . um-mode)
 
   :custom (um-root-glob ".*/writing/journal")
 
@@ -78,12 +59,25 @@ My config looks like this:
 
   :config
   (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
-
-  :load-path "um/elisp"
 )
 ```
 
 Note the optional setup of `embark`, which allows us to find files intelligently, explained below.
+
+## CLI binary
+
+Build the `um` binary:
+
+```sh
+cd ~/.emacs.d/elpa/um/go
+go build -o um
+```
+
+Symlink somewhere in your `PATH`:
+
+```sh
+ln -s ~/.emacs.d/elpa/um/go/um /usr/local/bin/um
+```
 
 # ultralight "database"
 
