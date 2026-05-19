@@ -81,8 +81,6 @@
                       )
   "um date regexp. built from `um-date-separator'. NOTE: currently assumes
 ISO8601."
-  :type '(string)
-  :group 'um
   )
 
 ;; NOTE: regexp-opt wraps the whole expression in (), so I can't omit the -.
