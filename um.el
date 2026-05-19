@@ -38,7 +38,6 @@
 
 (require 'project)
 (require 'dired)
-(require 'um-mode)
 
 (defgroup um nil
   "(u)ltralight (m)arkdown zettelkasten."
@@ -378,7 +377,7 @@ Returns the value of next-file computed by um next
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; um-minor-mode
+;; um-minor-mode : in markdown files under markdown-mode
 
 (defvar-keymap um-minor-mode-map
   :doc "Keymap for `um-minor-mode'."
@@ -387,6 +386,7 @@ Returns the value of next-file computed by um next
   "M-r t" #'um-tag-dwim
   )
 
+;;;###autoload
 (define-minor-mode um-minor-mode
   "Minor mode for `um' commands.
 \\{um-minor-mode-map}"
@@ -400,5 +400,41 @@ Returns the value of next-file computed by um next
     (font-lock-remove-keywords nil um-minor-mode-keywords)
     (font-lock-flush))
   )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; um-mode : in .um files
+
+(defun um-inhibit-read-only (cmd &optional args)
+  (let ((inhibit-read-only t))
+    (apply cmd args)))
+
+(defun um-drag-stuff-up () (interactive) (um-inhibit-read-only 'drag-stuff-up '(1)))
+(defun um-drag-stuff-down () (interactive) (um-inhibit-read-only 'drag-stuff-down '(1)))
+(defun um-kill-line () (interactive) (um-inhibit-read-only 'kill-line))
+(defun um-tag-dwim-inhibit-read-only (arg) (interactive "p")
+       (um-inhibit-read-only 'um-tag-dwim (list arg)))
+
+;; NOTE: define-derived-mode defines a sparse keymap with the parent mode. But
+;; we can prefill it:
+(defvar-keymap um-mode-map
+  :doc "Keymap for um-mode."
+  "n" 'next-line
+  "p" 'previous-line
+  "M-p" 'um-drag-stuff-up
+  "M-n" 'um-drag-stuff-down
+  "M-k" 'um-kill-line
+  "t" 'um-tag-dwim-inhibit-read-only
+  )
+
+;;;###autoload
+(define-derived-mode um-mode special-mode "um-mode"
+  "major mode for *.um file lists. Mostly `special-mode' with a few more commands.
+
+\\{um-mode-map}
+"
+  (if um-mode
+      (progn
+        (read-only-mode))
+    (read-only-mode -1)))
 
 (provide 'um)
