@@ -140,7 +140,6 @@ ISO8601."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; journal header
 
-;;;###autoload
 (defun um-journal-header ()
   "Create a header composed of:
 
@@ -249,6 +248,7 @@ ISO8601."
     (match-string 1 header)
     ))
 
+;;;###autoload
 (defun um-tag-grep ()
   "Run `project-find-regexp' on a selection made from `um-tags-history' via
   `completing-read'.
