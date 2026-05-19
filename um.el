@@ -432,6 +432,9 @@ Returns the value of next-file computed by um next
 
 \\{um-mode-map}
 "
+  :init-value nil
+  :lighter " uM"
+  :keymap um-mode-map
   (if um-mode
       (progn
         (read-only-mode))
