@@ -1,0 +1,7 @@
+# go binary
+go/um
+
+# emacs package artifacts
+*.elc
+um-autoloads.el
+um-pkg.el
