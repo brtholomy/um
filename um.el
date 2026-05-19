@@ -37,21 +37,32 @@
 ;; `um-tag-dwim': insert or delete a tag in dired and other contexts.
 
 (require 'project)
+(require 'dired)
 (require 'um-mode)
+
+(defgroup um nil
+  "(u)ltralight (m)arkdown zettelkasten."
+  :link '(url-link :tag "Website" "https://github.com/brtholomy/um")
+  :group 'files
+  :prefix "um-")
 
 (defcustom um-root-glob ".*/writing/journal"
   "Primary glob for `um-root-path.' This allows various mountpoints."
   :type '(string)
+  :group 'um
   )
 
 (defcustom um-date-separator "-"
   "Seperator used in date strings, used by `um-date-format' and `um-date-re'."
   :type '(string)
+  :group 'um
   )
 
 (defcustom um-date-format (concat "%Y" um-date-separator "%m" um-date-separator "%d")
-  "Format passed to `format-time-string' when creating `um-journal-header'. Defaults to ISO8601."
+  "Format passed to `format-time-string' when creating
+ `um-journal-header'. Defaults to ISO8601."
   :type '(string)
+  :group 'um
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -68,14 +79,22 @@
                              (repeat 1 2 digit))
                       line-end
                       )
-  "um date regexp. built from `um-date-separator'. NOTE: currently assumes ISO8601.")
+  "um date regexp. built from `um-date-separator'. NOTE: currently assumes
+ISO8601."
+  :type '(string)
+  :group 'um
+  )
 
 ;; NOTE: regexp-opt wraps the whole expression in (), so I can't omit the -.
 (defcustom um-locale-re (regexp-opt '(
                                       "- home"
                                       "- away"
                                       ))
-  "um locale regexp. Add your custom places within a `regexp-opt' or make it general.")
+  "um locale regexp. Add your custom places within a `regexp-opt' or
+ make it general."
+  :type '(string)
+  :group 'um
+  )
 
 (defconst um-tag-re "^\\+ \\([[:alpha:]\\_\\-]+$\\)"
   "um tag regexp. Allows hypens and underscores within the tag.")
@@ -85,21 +104,27 @@
     (t (
         :inherit shadow
         )))
-  "um date face")
+  "um date face"
+  :group 'um
+  )
 
 (defface font-lock-um-locale-face
   `((((type tty) (class mono)))
     (t (
         :inherit shadow
         )))
-  "um locale face")
+  "um locale face"
+  :group 'um
+  )
 
 (defface font-lock-um-tag-face
   `((((type tty) (class mono)))
     (t (
         :inherit shadow
         )))
-  "um tag face")
+  "um tag face"
+  :group 'um
+  )
 
 ;; TODO: should this be a user setup hook?
 ;; TODO: these matchers should be functions which only match against the header.
@@ -223,15 +248,18 @@
     ))
 
 (defun um-tag-grep ()
-  "Run `project-find-regexp' on a selection made from `um-tags-history' via `completing-read'.
+  "Run `project-find-regexp' on a selection made from `um-tags-history' via
+  `completing-read'.
 
 The initial value provided to `completing-read' is the first tag found in the
 current buffer: it will be first in the list and available via \\`M-n'.
 
 NOTE: searches in the current project root by default, but
-\\[universal-argument] will allow choice of the base directory as in `project-find-regexp'.
+\\[universal-argument] will allow choice of the base directory as in
+`project-find-regexp'.
 
-Ultimately this relies on `xref-matches-in-files', which calls `xref-search-program'.
+Ultimately this relies on `xref-matches-in-files', which calls
+`xref-search-program'.
 "
   (interactive)
   (project-find-regexp (concat "^\\+ "
@@ -248,7 +276,7 @@ Ultimately this relies on `xref-matches-in-files', which calls `xref-search-prog
   "Insert TAG as + tag\n in current buffer appending to the journal header."
   (goto-char (point-min))
   (search-forward "\n\n")
-  (previous-line)
+  (forward-line -1)
   (insert (concat "+ " tag "\n"))
   )
 
@@ -256,7 +284,7 @@ Ultimately this relies on `xref-matches-in-files', which calls `xref-search-prog
   "Delete TAG from the journal header in current buffer."
   (goto-char (point-min))
   (search-forward (concat "+ " tag "\n"))
-  (previous-line)
+  (forward-line -1)
   (kill-line)
   )
 
