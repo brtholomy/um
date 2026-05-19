@@ -359,23 +359,6 @@ in which case TAGS is also ignored.
   (message (format "creating %s" next-file))
   )
 
-(defun um-next-shell (dir &optional descriptor skip-header)
-  "Calls um next in the provided dir.
-
-With the option not to leave behind the um-journal-header.
-
-Returns the value of next-file computed by um next
-"
-  (let ((default-directory dir) (next-file))
-    ;; https://emacs.stackexchange.com/a/19878
-    (setq next-file (shell-command-to-string
-                     (concat "export UMNEXTPRINT=true; um next"
-                             (concat " " descriptor))))
-    (um-next next-file nil skip-header)
-    next-file
-    )
-  )
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; um-minor-mode : in markdown files under markdown-mode
 
