@@ -124,14 +124,19 @@ ISO8601."
   :group 'um
   )
 
-;; TODO: should this be a user setup hook?
-;; TODO: these matchers should be functions which only match against the header.
 (font-lock-add-keywords 'markdown-mode
                         `(
                           (,um-date-re 1 'font-lock-um-date-face)
                           (,um-locale-re 0 'font-lock-um-locale-face)
                           (,um-tag-re 1 'font-lock-um-tag-face)
                           ))
+
+(defvar um-minor-mode-keywords
+  `(
+    (,um-date-re 1 'font-lock-um-date-face)
+    (,um-locale-re 0 'font-lock-um-locale-face)
+    (,um-tag-re 1 'font-lock-um-tag-face)
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; journal header
@@ -370,6 +375,30 @@ Returns the value of next-file computed by um next
     (um-next next-file nil skip-header)
     next-file
     )
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; um-minor-mode
+
+(defvar-keymap um-minor-mode-map
+  :doc "Keymap for `um-minor-mode'."
+  "M-s t" #'um-tag-grep
+  ;; M-r is not exactly right, but can't think of a better binding:
+  "M-r t" #'um-tag-dwim
+  )
+
+(define-minor-mode um-minor-mode
+  "Minor mode for `um' commands.
+\\{um-minor-mode-map}"
+  :init-value nil
+  :lighter " um"
+  :keymap um-minor-mode-map
+  (if um-minor-mode
+      (progn
+        (font-lock-add-keywords nil um-minor-mode-keywords)
+        (font-lock-flush))
+    (font-lock-remove-keywords nil um-minor-mode-keywords)
+    (font-lock-flush))
   )
 
 (provide 'um)

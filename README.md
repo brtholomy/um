@@ -48,8 +48,8 @@ Install with use-package:
 ```elisp
 (use-package um
   :vc (:url "https://github.com/brtholomy/um" :rev :newest)
-  :after (markdown-mode embark)
   :mode ("\\.um\\'" . um-mode)
+  :hook (markdown-mode-hook . um-minor-mode)
 
   :custom (um-root-glob ".*/writing/journal")
 
