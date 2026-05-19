@@ -1,6 +1,7 @@
 ;;; um.el --- An Ultralight database for Markdown composition. -*- lexical-binding: t -*-
 
 ;; by bth
+;; Version: 0.1
 
 ;; Um is an ultralight database design and emacs toolkit for organizing writing
 ;; into larger compositions. It uses only unique filenames, POSIX filesystem
