@@ -390,6 +390,7 @@ Optional TAGS string may contain more than one tag separated by a comma.
 (defun um-drag-stuff-up () (interactive) (um-inhibit-read-only 'drag-stuff-up '(1)))
 (defun um-drag-stuff-down () (interactive) (um-inhibit-read-only 'drag-stuff-down '(1)))
 (defun um-kill-line () (interactive) (um-inhibit-read-only 'kill-line))
+(defun um-kill-region () (interactive) (um-inhibit-read-only 'kill-region '(nil nil t)))
 (defun um-yank () (interactive) (um-inhibit-read-only 'yank))
 (defun um-tag-dwim-inhibit-read-only (arg) (interactive "p")
        (um-inhibit-read-only 'um-tag-dwim (list arg)))
@@ -403,6 +404,7 @@ Optional TAGS string may contain more than one tag separated by a comma.
   "M-p" 'um-drag-stuff-up
   "M-n" 'um-drag-stuff-down
   "C-k" 'um-kill-line
+  "C-w" 'um-kill-region
   "C-y" 'um-yank
   "t" 'um-tag-dwim-inhibit-read-only
   )
