@@ -242,6 +242,11 @@ ISO8601."
                      "\n\n" t
                      )))
 
+(defun um--header-end-pos ()
+  (save-excursion
+    (goto-char (point-min))
+    (search-forward "\n\n")))
+
 (defun um-tag-first-in-current-buffer ()
   (let ((header (um-header-current-buffer)))
     (string-match um-tag-regexp header)
@@ -281,7 +286,7 @@ Ultimately this relies on `xref-matches-in-files', which calls
           (find-file-noselect f t)
         (save-excursion
           (goto-char (point-min))
-          (let* ((bound (save-excursion (search-forward "\n\n")))
+          (let* ((bound (um--header-end-pos))
                  (found t))
             (while found
               (setq found (search-forward-regexp um-tag-regexp bound t))
@@ -292,19 +297,15 @@ Ultimately this relies on `xref-matches-in-files', which calls
 
 (defun um-tag-insert (tag)
   "Insert TAG as + tag\n in current buffer appending to the journal header."
-  (goto-char (point-min))
-  (search-forward "\n\n")
+  (goto-char (um--header-end-pos))
   (forward-line -1)
-  (insert (concat "+ " tag "\n"))
-  )
+  (insert (concat "+ " tag "\n")))
 
 (defun um-tag-delete (tag)
   "Delete TAG from the journal header in current buffer."
   (goto-char (point-min))
-  (search-forward (concat "+ " tag "\n"))
-  (forward-line -1)
-  (kill-line)
-  )
+  (when (search-forward (concat "+ " tag "\n") (um--header-end-pos) t)
+    (delete-region (match-beginning 0) (match-end 0))))
 
 (defun um-tag-do (tag insert)
   "Insert or delete TAG from the journal header in current buffer.
