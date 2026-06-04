@@ -277,16 +277,17 @@ Ultimately this relies on `xref-matches-in-files', which calls
 (defun um--extract-tags (files)
   (let ((tags))
     (dolist (f files)
-      (with-temp-buffer
-        (find-file f)
-        (goto-char (point-min))
-        (let* ((bound (save-excursion (search-forward "\n\n")))
-               (found t))
-          (while found
-            (setq found (search-forward-regexp um-tag-regexp bound t))
-            (when found (add-to-list 'tags (buffer-substring-no-properties
-                                            (match-beginning 1) (match-end 1))))
-            ))))
+      (with-current-buffer
+          (find-file-noselect f t)
+        (save-excursion
+          (goto-char (point-min))
+          (let* ((bound (save-excursion (search-forward "\n\n")))
+                 (found t))
+            (while found
+              (setq found (search-forward-regexp um-tag-regexp bound t))
+              (when found (add-to-list 'tags (buffer-substring-no-properties
+                                              (match-beginning 1) (match-end 1))))
+              )))))
     (reverse tags)))
 
 (defun um-tag-insert (tag)
@@ -344,17 +345,15 @@ Negative prefix arg is handled by `um-tag-do', which see.
          (completions-sort (if insert completions-sort nil))
          (vertico-sort-function (if insert vertico-sort-function nil))
          (tag (completing-read prompt collection nil nil nil
-                               'um-tags-history))
-         ;; TODO: save-excursion is not working around the dolist. why?
-         (buf (current-buffer)))
+                               'um-tags-history)))
 
     (dolist (f files)
-      (save-excursion
-        ;; TODO: this should use the fallback logic:
-        (find-file (expand-file-name f (um-root-path)))
-        (um-tag-do tag ARG)
-        (save-buffer)))
-    (switch-to-buffer buf)
+      (with-current-buffer
+          ;; TODO: this should use the fallback logic:
+          (find-file-noselect (expand-file-name f (um-root-path)) t)
+        (save-excursion
+          (um-tag-do tag ARG)
+          (save-buffer))))
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
