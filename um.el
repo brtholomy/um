@@ -310,7 +310,8 @@ Negative prefix arg is handled by `um-tag-do', which see.
 "
   (interactive "p")
   (let* (
-         (tag (completing-read "insert um tag: " um-tags-history nil nil nil 'um-tags-history))
+         (prompt (format "um tag %s: " (if (> ARG 0) "insert" "delete")))
+         (tag (completing-read prompt um-tags-history nil nil nil 'um-tags-history))
          (marks (if (eq major-mode 'dired-mode) (dired-get-marked-files) nil))
          ;; NOTE: should avoid bogus strings when in a markdown buffer:
          (fap (um-find-file-at-point))
