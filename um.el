@@ -328,10 +328,8 @@ Negative prefix arg is handled by `um-tag-do', which see.
                        ;; TODO: this should use the fallback logic:
                        (find-file (expand-file-name f (um-root-path)))
                        (um-tag-do tag ARG)
-                       )
-                     (switch-to-buffer buf)
-                     (save-some-buffers t)
-                     )
+                       (save-buffer))
+                     (switch-to-buffer buf))
       (save-excursion (um-tag-do tag ARG)))
     ))
 
