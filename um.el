@@ -330,7 +330,7 @@ Negative prefix arg is handled by `um-tag-do', which see.
                        (um-tag-do tag ARG)
                        (save-buffer))
                      (switch-to-buffer buf))
-      (save-excursion (um-tag-do tag ARG)))
+      (save-excursion (um-tag-do tag ARG) (save-buffer)))
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
