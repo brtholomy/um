@@ -274,6 +274,21 @@ Ultimately this relies on `xref-matches-in-files', which calls
                                                 )
                                "$")))
 
+(defun um--extract-tags (files)
+  (let ((tags))
+    (dolist (f files)
+      (with-temp-buffer
+        (find-file f)
+        (goto-char (point-min))
+        (let* ((bound (save-excursion (search-forward "\n\n")))
+               (found t))
+          (while found
+            (setq found (search-forward-regexp um-tag-regexp bound t))
+            (when found (add-to-list 'tags (buffer-substring-no-properties
+                                            (match-beginning 1) (match-end 1))))
+            ))))
+    (reverse tags)))
+
 (defun um-tag-insert (tag)
   "Insert TAG as + tag\n in current buffer appending to the journal header."
   (goto-char (point-min))
@@ -310,8 +325,8 @@ Negative prefix arg is handled by `um-tag-do', which see.
 "
   (interactive "p")
   (let* (
-         (prompt (format "um tag %s: " (if (> ARG 0) "insert" "delete")))
-         (tag (completing-read prompt um-tags-history nil nil nil 'um-tags-history))
+         (insert (> ARG 0))
+         (prompt (format "um tag %s: " (if insert "insert" "delete")))
          (marks (if (eq major-mode 'dired-mode) (dired-get-marked-files) nil))
          ;; NOTE: should avoid bogus strings when in a markdown buffer:
          (fap (um-find-file-at-point))
@@ -320,17 +335,26 @@ Negative prefix arg is handled by `um-tag-do', which see.
                   (string-split (buffer-substring (region-beginning) (region-end))))
                  (marks marks)
                  (fap (list fap))
+                 (t (list (buffer-file-name)))
                  ))
-         ;; save-excursion is not working below, why?
+         (collection (if insert um-tags-history (um--extract-tags files)))
+         ;; no need for dupes:
+         (history-delete-duplicates t)
+         ;; override sorting when deleting, because we sort the tags:
+         (completions-sort (if insert completions-sort nil))
+         (vertico-sort-function (if insert vertico-sort-function nil))
+         (tag (completing-read prompt collection nil nil nil
+                               'um-tags-history))
+         ;; TODO: save-excursion is not working around the dolist. why?
          (buf (current-buffer)))
 
-    (if files (progn (dolist (f files)
-                       ;; TODO: this should use the fallback logic:
-                       (find-file (expand-file-name f (um-root-path)))
-                       (um-tag-do tag ARG)
-                       (save-buffer))
-                     (switch-to-buffer buf))
-      (save-excursion (um-tag-do tag ARG) (save-buffer)))
+    (dolist (f files)
+      (save-excursion
+        ;; TODO: this should use the fallback logic:
+        (find-file (expand-file-name f (um-root-path)))
+        (um-tag-do tag ARG)
+        (save-buffer)))
+    (switch-to-buffer buf)
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
