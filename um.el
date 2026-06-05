@@ -294,10 +294,15 @@ Ultimately this relies on `xref-matches-in-files', which calls
     (reverse tags)))
 
 (defun um-tag-insert (tag)
-  "Insert TAG as + tag\n in current buffer appending to the journal header."
-  (goto-char (um--header-end-pos))
-  (forward-line -1)
-  (insert (concat "+ " tag "\n")))
+  "Insert TAG as + tag\n in current buffer appending to the journal header.
+
+Emits message if TAG is already present, but does not error."
+  (if (member tag (um--extract-tags (list buffer-file-name)))
+      ;; NOTE: user-error would stop any iteration over files:
+      (message "\"%s\" tag already exists in %s" tag buffer-file-name)
+    (goto-char (um--header-end-pos))
+    (forward-line -1)
+    (insert (concat "+ " tag "\n"))))
 
 (defun um-tag-delete (tag)
   "Delete TAG from the journal header in current buffer."
