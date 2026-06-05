@@ -307,8 +307,11 @@ Emits message if TAG is already present, but does not error."
 (defun um-tag-delete (tag)
   "Delete TAG from the journal header in current buffer."
   (goto-char (point-min))
-  (when (search-forward (concat "+ " tag "\n") (um--header-end-pos) t)
-    (delete-region (match-beginning 0) (match-end 0))))
+  (if (search-forward (concat "+ " tag "\n") (um--header-end-pos) t)
+      (delete-region (match-beginning 0) (match-end 0))
+    ;; NOTE: as long as collection was gathered with um--extract-tags, this
+    ;; shouldn't happen:
+    (message "\"%s\" tag not found in %s" tag buffer-file-name)))
 
 (defun um-tag-do (tag insert)
   "Insert or delete TAG from the journal header in current buffer.
