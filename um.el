@@ -93,7 +93,7 @@ ISO8601."
   :group 'um
   )
 
-(defconst um-tag-re "^\\+ \\([[:alpha:]\\_\\-]+$\\)"
+(defconst um-tag-regexp "^\\+ \\([[:alpha:]\\_\\-]+\\)$"
   "um tag regexp. Allows hypens and underscores within the tag.")
 
 (defface font-lock-um-date-face
@@ -127,14 +127,14 @@ ISO8601."
                         `(
                           (,um-date-re 1 'font-lock-um-date-face)
                           (,um-locale-re 0 'font-lock-um-locale-face)
-                          (,um-tag-re 1 'font-lock-um-tag-face)
+                          (,um-tag-regexp 1 'font-lock-um-tag-face)
                           ))
 
 (defvar um-minor-mode-keywords
   `(
     (,um-date-re 1 'font-lock-um-date-face)
     (,um-locale-re 0 'font-lock-um-locale-face)
-    (,um-tag-re 1 'font-lock-um-tag-face)
+    (,um-tag-regexp 1 'font-lock-um-tag-face)
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -234,8 +234,6 @@ ISO8601."
 ;; NOTE: this will get saved by savehist-mode
 (defvar um-tags-history nil "History of inserted or searched for tags. Populates
 `completing-read'.")
-
-(defconst um-tag-regexp "^\\+ \\(.*\\)$")
 
 (defun um-header-current-buffer ()
   (car (split-string (buffer-substring-no-properties (point-min) (point-max))
