@@ -317,9 +317,10 @@ Emits message if TAG is already present, but does not error."
   "Insert or delete TAG from the journal header in current buffer.
 
 insert when INSERT > 0, delete otherwise."
-  (if (> insert 0)
-      (um-tag-insert tag)
-    (um-tag-delete tag)))
+  (save-excursion
+    (if (> insert 0)
+        (um-tag-insert tag)
+      (um-tag-delete tag))))
 
 ;;;###autoload
 (defun um-tag-dwim (ARG)
@@ -358,9 +359,8 @@ Negative prefix arg is handled by `um-tag-do', which see.
       (with-current-buffer
           ;; TODO: this should use the fallback logic:
           (find-file-noselect (expand-file-name f (um-root-path)) t)
-        (save-excursion
-          (um-tag-do tag ARG)
-          (save-buffer))))
+        (um-tag-do tag ARG)
+        (save-buffer)))
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
