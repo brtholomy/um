@@ -412,6 +412,12 @@ Optional TAGS string may contain more than one tag separated by a comma.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; um-mode : in .um files
 
+(defun um-next-line ()
+  (interactive) (move-beginning-of-line nil) (next-line))
+
+(defun um-previous-line ()
+  (interactive) (move-beginning-of-line nil) (previous-line))
+
 (defun um-inhibit-read-only (cmd &optional args)
   (let ((inhibit-read-only t))
     (apply cmd args)))
@@ -420,6 +426,9 @@ Optional TAGS string may contain more than one tag separated by a comma.
 (defun um-drag-stuff-down () (interactive) (um-inhibit-read-only 'drag-stuff-down '(1)))
 (defun um-kill-line () (interactive) (um-inhibit-read-only 'kill-line))
 (defun um-kill-region () (interactive) (um-inhibit-read-only 'kill-region '(nil nil t)))
+;; NOTE: parallel to dired-copy-filename-as-kill
+(defun um-copy-line-as-kill () (interactive) (kill-ring-save (pos-bol) (pos-eol))
+       (message (buffer-substring-no-properties (pos-bol) (pos-eol))))
 (defun um-yank () (interactive) (um-inhibit-read-only 'yank))
 (defun um-tag-dwim-inhibit-read-only (arg) (interactive "p")
        (um-inhibit-read-only 'um-tag-dwim (list arg)))
@@ -428,12 +437,14 @@ Optional TAGS string may contain more than one tag separated by a comma.
 ;; we can prefill it:
 (defvar-keymap um-mode-map
   :doc "Keymap for um-mode."
-  "n" 'next-line
-  "p" 'previous-line
+  "n" 'um-next-line
+  "p" 'um-previous-line
   "M-p" 'um-drag-stuff-up
   "M-n" 'um-drag-stuff-down
   "C-k" 'um-kill-line
+  "k" 'um-kill-line
   "C-w" 'um-kill-region
+  "w" 'um-copy-line-as-kill
   "C-y" 'um-yank
   "t" 'um-tag-dwim-inhibit-read-only
   )
