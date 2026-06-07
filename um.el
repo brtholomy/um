@@ -282,7 +282,9 @@ Negative prefix arg is handled by `um--tag-do', which see.
          (history-delete-duplicates t)
          ;; override sorting when deleting, because we sort the tags:
          (completions-sort (if insert completions-sort nil))
-         (vertico-sort-function (if insert vertico-sort-function nil))
+         (vertico-sort-function (if (and insert (bound-and-true-p vertico-sort-function))
+                                    vertico-sort-function
+                                  nil))
          (tag (completing-read prompt collection nil nil nil
                                'um-tags-history)))
 
