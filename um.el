@@ -169,6 +169,8 @@
 (defconst um--tag-regexp "^\\+ \\([[:alpha:]\\_\\-]+\\)$"
   "um tag regexp. Allows hypens and underscores within the tag.")
 
+(defconst um--header-end "\n\n" "um header is delimited by the first two newlines.")
+
 ;; NOTE: this will get saved by savehist-mode
 (defvar um-tags-history nil "History of inserted or searched for tags. Populates
 `completing-read'.")
@@ -176,7 +178,7 @@
 (defun um--header-end-pos ()
   (save-excursion
     (goto-char (point-min))
-    (search-forward "\n\n")))
+    (search-forward um--header-end)))
 
 (defun um--tag-first-in-buffer ()
   (save-excursion
@@ -308,7 +310,7 @@ Negative prefix arg is handled by `um--tag-do', which see.
 
 "
   (insert
-   (format "# %s\n: %s\n\n" filename (format-time-string um--date-format)))
+   (format "# %s\n: %s%s" filename (format-time-string um--date-format) um--header-end))
   (when tags
     (forward-line -1)
     (dolist (tag (split-string tags ","))
@@ -331,7 +333,9 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   (message "um next: %s" filename))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; um-minor-mode : under markdown-mode
+;;; um-minor-mode
+;;
+;; intended to be hooked into markdown-mode
 
 (defface um-date-face
   `((((type tty) (class mono)))
@@ -367,11 +371,127 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
     (,um--tag-regexp 1 'um-tag-face)
     ))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; section
+
+;; Rather than migrate to org-mode or some other more complex specification,
+;; I've opted to extend and augment my own idiom for structuring Markdown as
+;; befits my style of writing: simple sections separated by a horizontal line.
+;; This code is an attempt to make working with those sections easier.
+
+(defconst um--section "\n---\n\n")
+
+(defun um-section ()
+  "Insert a horizontal rule between paragraphs, defining a section of text."
+  (interactive)
+  ;; reduce to either 1 or none: if 1, it'll be pushed to after the string.
+  (delete-blank-lines)
+  (insert um--section)
+  ;; move to the beginning of the following text
+  (re-search-forward "[^[:space:]]" nil t 1)
+  ;; the previous leaves us just after the first character.
+  (backward-char)
+  ;; reduces to a single empty line before point.
+  (ensure-empty-lines))
+
+(defun um--goto-section (direction)
+  (let ((origpos (point))
+        (header (save-excursion
+                  (goto-char (point-min))
+                  (search-forward markdown-header-end nil t)))
+        (pos (save-excursion
+               (search-forward um--section nil t direction)))
+        (endpos (match-end 0)))
+
+    (cond ((= origpos (point-min)) (goto-char header))
+          ((and pos (= 1 direction)) (goto-char pos))
+          ;; when going backwards, the pos will be at the beginning of the
+          ;; string, while the endpos will be where we want to end up. This allows
+          ;; for the backwards movement to take you to that spot if you're within a
+          ;; section, but move past it if you're already at this point.
+          ((and pos (= -1 direction))
+           (goto-char pos)
+           (if (= origpos endpos)
+               (um--goto-section -1)
+             (goto-char endpos)))
+          ;; pos will be nil when going back to beginning, so this clause will
+          ;; match if the header is found:
+          ((and header (= -1 direction)) (goto-char header))
+          )))
+
+(defun um-forward-section ()
+  "Move to next section marker."
+  (interactive) (um--goto-section 1))
+
+(defun um-backward-section ()
+  "Move to previous section marker."
+  (interactive) (um--goto-section -1))
+
+(defun um-mark-section ()
+  "Mark text between section markers. Repeat to expand."
+  (interactive)
+  (let* ((pos (save-excursion
+                (search-backward um--section nil t)))
+         (m (if pos (match-end 0) (point))))
+    (when (not (region-active-p)) (set-mark m))
+    ;; NOTE: don't use um--goto-section because it doesn't go to eobp
+    ;; 'noerror will take us to the end of buffer if no next
+    (search-forward um--section nil 'noerror)))
+
+(defun um--backward-section-permissive ()
+  ;; NOTE: won't work without this hack when point is on line just below the
+  ;; section, because the um--section includes 2 newlines.
+  (search-backward (substring um--section 0 -1) nil t))
+
+(defun um--delete-section ()
+  (um--backward-section-permissive)
+  (delete-region (match-beginning 0) (match-end 0))
+  ;; to achieve single blank line before:
+  (ensure-empty-lines)
+  ;; and after:
+  (delete-blank-lines))
+
+(defun um-backward-kill-paragraph-or-section ()
+  "Kills either a preceding paragraph or `um-section'"
+  (interactive)
+  (let ((section-pos) (text-pos))
+    (save-excursion
+      (setq section-pos (um--backward-section-permissive)))
+    (save-excursion
+      (setq text-pos (re-search-backward "[[:alpha:]]" nil t 1)))
+    (if (and section-pos (> section-pos text-pos))
+        (um--delete-section)
+      (backward-kill-paragraph 1))))
+
+(defun um-transpose-section (&optional arg)
+  "Like transpose-paragraphs but for `um-section'.
+
+A negative prefix argument moves it backward.
+"
+  (interactive "p")
+  (let ((direction (if (< arg 0)
+                       -1 1
+                       )))
+    (markdown-mark-section)
+    (kill-region nil nil t)
+    (markdown-goto-section direction)
+    (yank)
+    ;; to get us back to the top of the section region
+    (set-mark-command 1)
+    ))
+
 (defvar-keymap um-minor-mode-map
   :doc "Keymap for `um-minor-mode'."
   "M-s t" #'um-tag-grep
   ;; M-r is not exactly right, but can't think of a better binding:
   "M-r t" #'um-tag-dwim
+  ;; TODO: find a better default binding?
+  "C-c s" #'um-section
+  "M-o" #'um-backward-kill-paragraph-or-section
+  "C-M-n" #'um-forward-section
+  "C-M-p" #'um-backward-section
+  "C-M-h" #'um-mark-section
+  "C-M-t" #'um-transpose-section
   )
 
 ;;;###autoload
