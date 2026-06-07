@@ -398,7 +398,7 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   (let ((origpos (point))
         (header (save-excursion
                   (goto-char (point-min))
-                  (search-forward markdown-header-end nil t)))
+                  (search-forward um--header-end nil t)))
         (pos (save-excursion
                (search-forward um--section nil t direction)))
         (endpos (match-end 0)))
@@ -472,9 +472,9 @@ A negative prefix argument moves it backward.
   (let ((direction (if (< arg 0)
                        -1 1
                        )))
-    (markdown-mark-section)
+    (um-mark-section)
     (kill-region nil nil t)
-    (markdown-goto-section direction)
+    (um--goto-section direction)
     (yank)
     ;; to get us back to the top of the section region
     (set-mark-command 1)
