@@ -469,13 +469,29 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
 A negative prefix argument moves it backward.
 "
   (interactive "p")
-  (let ((direction (if (< arg 0)
-                       -1 1
-                       )))
-    (um-mark-section)
-    (kill-region nil nil t)
-    (um--goto-section direction)
-    (yank)
+  (let* ((direction (if (< arg 0)
+                        -1 1
+                        ))
+         (origpos (point))
+         (last (save-excursion
+                 (not (search-forward um--section nil t))))
+         (secondlast (save-excursion
+                       (not (search-forward um--section nil t 2)))))
+    (cond ((and last (= -1 direction))
+           (um--goto-section -1)
+           (um-transpose-section 1))
+          ((and secondlast (= 1 direction))
+           (um-mark-section)
+           (kill-region nil nil t)
+           (goto-char (point-max))
+           (um-section)
+           (yank)
+           (um--delete-section))
+          (t
+           (um-mark-section)
+           (kill-region nil nil t)
+           (um--goto-section direction)
+           (yank)))
     ;; to get us back to the top of the section region
     (set-mark-command 1)
     ))
