@@ -173,21 +173,15 @@
 (defvar um-tags-history nil "History of inserted or searched for tags. Populates
 `completing-read'.")
 
-(defun um--header-current-buffer ()
-  (car (split-string (buffer-substring-no-properties (point-min) (point-max))
-                     "\n\n" t
-                     )))
-
 (defun um--header-end-pos ()
   (save-excursion
     (goto-char (point-min))
     (search-forward "\n\n")))
 
-(defun um--tag-first-in-current-buffer ()
-  (let ((header (um--header-current-buffer)))
-    (string-match um--tag-regexp header)
-    (match-string 1 header)
-    ))
+(defun um--tag-first-in-buffer ()
+  (save-excursion
+    (when (search-forward um--tag-regexp (um--header-end-pos) t)
+      (match-string 1))))
 
 ;;;###autoload
 (defun um-tag-grep ()
@@ -211,8 +205,7 @@ Ultimately this relies on `xref-matches-in-files', which calls
                                                 ;; NOTE: this means searches
                                                 ;; will add to the history:
                                                 'um-tags-history
-                                                (um--tag-first-in-current-buffer)
-                                                )
+                                                (um--tag-first-in-buffer))
                                "$")))
 
 (defun um--extract-tags (files)
