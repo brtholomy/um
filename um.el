@@ -60,13 +60,6 @@
   :group 'um
   )
 
-(defcustom um-date-format (concat "%Y" um-date-separator "%m" um-date-separator "%d")
-  "Format passed to `format-time-string' when creating
- `um-journal-header'. Defaults to ISO8601."
-  :type '(string)
-  :group 'um
-  )
-
 ;; NOTE: regexp-opt wraps the whole expression in (), so I can't omit the -.
 (defcustom um-locale-re (regexp-opt '(
                                       "- home"
@@ -76,6 +69,23 @@
  make it general."
   :type '(string)
   :group 'um
+  )
+
+(defconst um-date-format (concat "%Y" um-date-separator "%m" um-date-separator "%d")
+  "Format passed to `format-time-string' when creating
+ `um--header'. ISO8601 with a custom `um-date-separator'.")
+
+(defconst um-date-re (rx
+                      line-start
+                      (literal ": ")
+                      (group (repeat 4 digit)
+                             (literal um-date-separator)
+                             (repeat 1 2 digit)
+                             (literal um-date-separator)
+                             (repeat 1 2 digit))
+                      line-end
+                      )
+  "um date regexp. built from `um-date-separator'."
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -324,21 +334,6 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; um-minor-mode : under markdown-mode
-
-;; TODO: doesn't currently respect um-date-format:
-(defconst um-date-re (rx
-                      line-start
-                      (literal ": ")
-                      (group (repeat 4 digit)
-                             (literal um-date-separator)
-                             (repeat 1 2 digit)
-                             (literal um-date-separator)
-                             (repeat 1 2 digit))
-                      line-end
-                      )
-  "um date regexp. built from `um-date-separator'. NOTE: currently assumes
-ISO8601."
-  )
 
 (defconst um-tag-regexp "^\\+ \\([[:alpha:]\\_\\-]+\\)$"
   "um tag regexp. Allows hypens and underscores within the tag.")
