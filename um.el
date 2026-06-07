@@ -338,7 +338,7 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; um-minor-mode : under markdown-mode
 
-(defface font-lock-um-date-face
+(defface um-date-face
   `((((type tty) (class mono)))
     (t (
         :inherit shadow
@@ -347,7 +347,7 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   :group 'um
   )
 
-(defface font-lock-um-locale-face
+(defface um-locale-face
   `((((type tty) (class mono)))
     (t (
         :inherit shadow
@@ -356,7 +356,7 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   :group 'um
   )
 
-(defface font-lock-um-tag-face
+(defface um-tag-face
   `((((type tty) (class mono)))
     (t (
         :inherit shadow
@@ -367,9 +367,9 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
 
 (defvar um--minor-mode-keywords
   `(
-    (,um--date-re 1 'font-lock-um-date-face)
-    (,um-locale-re 0 'font-lock-um-locale-face)
-    (,um--tag-regexp 1 'font-lock-um-tag-face)
+    (,um--date-re 1 'um-date-face)
+    (,um-locale-re 0 'um-locale-face)
+    (,um--tag-regexp 1 'um-tag-face)
     ))
 
 (defvar-keymap um-minor-mode-map
