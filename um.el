@@ -55,7 +55,7 @@
   )
 
 (defcustom um-date-separator "-"
-  "Seperator used in date strings, used by `um-date-format' and `um-date-re'."
+  "Seperator used in date strings, used by `um--date-format' and `um--date-re'."
   :type '(string)
   :group 'um
   )
@@ -71,27 +71,27 @@
   :group 'um
   )
 
-(defconst um-date-format (concat "%Y" um-date-separator "%m" um-date-separator "%d")
+(defconst um--date-format (concat "%Y" um-date-separator "%m" um-date-separator "%d")
   "Format passed to `format-time-string' when creating
  `um--header'. ISO8601 with a custom `um-date-separator'.")
 
-(defconst um-date-re (rx
-                      line-start
-                      (literal ": ")
-                      (group (repeat 4 digit)
-                             (literal um-date-separator)
-                             (repeat 1 2 digit)
-                             (literal um-date-separator)
-                             (repeat 1 2 digit))
-                      line-end
-                      )
+(defconst um--date-re (rx
+                       line-start
+                       (literal ": ")
+                       (group (repeat 4 digit)
+                              (literal um-date-separator)
+                              (repeat 1 2 digit)
+                              (literal um-date-separator)
+                              (repeat 1 2 digit))
+                       line-end
+                       )
   "um date regexp. built from `um-date-separator'."
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; find-file-at-point
 
-(defun um-root-path ()
+(defun um--root-path ()
   (or (car (seq-filter
             (lambda (path)
               ;; this way I don't have to hardcode the full path:
@@ -115,12 +115,12 @@
 
 1. `default-directory'
 2. `project-root'
-3. `um-root-path'
+3. `um--root-path'
 "
   (let ((dirs (list
                default-directory
                (when (project-current) (project-root (project-current)))
-               (um-root-path)))
+               (um--root-path)))
         dir
         file)
     (while (and dirs (not file))
@@ -154,23 +154,26 @@
 
 1. `default-directory'
 2. `project-root'
-3. `um-root-path'
+3. `um--root-path'
 "
   (or
    ;; this does both default-directory and project-root:
    (funcall origfunc)
-   (let ((default-directory (um-root-path)))
+   (let ((default-directory (um--root-path)))
      (funcall origfunc))
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; tags
 
+(defconst um--tag-regexp "^\\+ \\([[:alpha:]\\_\\-]+\\)$"
+  "um tag regexp. Allows hypens and underscores within the tag.")
+
 ;; NOTE: this will get saved by savehist-mode
 (defvar um-tags-history nil "History of inserted or searched for tags. Populates
 `completing-read'.")
 
-(defun um-header-current-buffer ()
+(defun um--header-current-buffer ()
   (car (split-string (buffer-substring-no-properties (point-min) (point-max))
                      "\n\n" t
                      )))
@@ -180,9 +183,9 @@
     (goto-char (point-min))
     (search-forward "\n\n")))
 
-(defun um-tag-first-in-current-buffer ()
-  (let ((header (um-header-current-buffer)))
-    (string-match um-tag-regexp header)
+(defun um--tag-first-in-current-buffer ()
+  (let ((header (um--header-current-buffer)))
+    (string-match um--tag-regexp header)
     (match-string 1 header)
     ))
 
@@ -208,7 +211,7 @@ Ultimately this relies on `xref-matches-in-files', which calls
                                                 ;; NOTE: this means searches
                                                 ;; will add to the history:
                                                 'um-tags-history
-                                                (um-tag-first-in-current-buffer)
+                                                (um--tag-first-in-current-buffer)
                                                 )
                                "$")))
 
@@ -222,13 +225,13 @@ Ultimately this relies on `xref-matches-in-files', which calls
           (let* ((bound (um--header-end-pos))
                  (found t))
             (while found
-              (setq found (search-forward-regexp um-tag-regexp bound t))
+              (setq found (search-forward-regexp um--tag-regexp bound t))
               (when found (add-to-list 'tags (buffer-substring-no-properties
                                               (match-beginning 1) (match-end 1))))
               )))))
     (reverse tags)))
 
-(defun um-tag-insert (tag)
+(defun um--tag-insert (tag)
   "Insert TAG as + tag\n in current buffer appending to the journal header.
 
 Emits message if TAG is already present, but does not error."
@@ -239,7 +242,7 @@ Emits message if TAG is already present, but does not error."
     (forward-line -1)
     (insert (concat "+ " tag "\n"))))
 
-(defun um-tag-delete (tag)
+(defun um--tag-delete (tag)
   "Delete TAG from the journal header in current buffer."
   (goto-char (point-min))
   (if (search-forward (concat "+ " tag "\n") (um--header-end-pos) t)
@@ -248,24 +251,24 @@ Emits message if TAG is already present, but does not error."
     ;; shouldn't happen:
     (message "\"%s\" tag not found in %s" tag buffer-file-name)))
 
-(defun um-tag-do (tag insert)
+(defun um--tag-do (tag insert)
   "Insert or delete TAG from the journal header in current buffer.
 
 insert when INSERT > 0, delete otherwise."
   (save-excursion
     (if (> insert 0)
-        (um-tag-insert tag)
-      (um-tag-delete tag))))
+        (um--tag-insert tag)
+      (um--tag-delete tag))))
 
 ;;;###autoload
 (defun um-tag-dwim (ARG)
-  "Run `um-tag-do' on a list of filenames if region active outside
+  "Run `um--tag-do' on a list of filenames if region active outside
   dired-mode, or if marks exist in dired-mode, or the filename at point, and
   finally in the current buffer if none of those conditions match.
 
-Assumes the files of interest are returned by `um-root-path'.
+Assumes the files of interest are returned by `um--root-path'.
 
-Negative prefix arg is handled by `um-tag-do', which see.
+Negative prefix arg is handled by `um--tag-do', which see.
 "
   (interactive "p")
   (let* (
@@ -293,8 +296,8 @@ Negative prefix arg is handled by `um-tag-do', which see.
     (dolist (f files)
       (with-current-buffer
           ;; TODO: this should use the fallback logic:
-          (find-file-noselect (expand-file-name f (um-root-path)) t)
-        (um-tag-do tag ARG)
+          (find-file-noselect (expand-file-name f (um--root-path)) t)
+        (um--tag-do tag ARG)
         (save-buffer)))
     ))
 
@@ -310,7 +313,7 @@ Negative prefix arg is handled by `um-tag-do', which see.
 
 "
   (insert
-   (format "# %s\n: %s\n\n" filename (format-time-string um-date-format)))
+   (format "# %s\n: %s\n\n" filename (format-time-string um--date-format)))
   (when tags
     (forward-line -1)
     (dolist (tag (split-string tags ","))
@@ -334,9 +337,6 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; um-minor-mode : under markdown-mode
-
-(defconst um-tag-regexp "^\\+ \\([[:alpha:]\\_\\-]+\\)$"
-  "um tag regexp. Allows hypens and underscores within the tag.")
 
 (defface font-lock-um-date-face
   `((((type tty) (class mono)))
@@ -365,11 +365,11 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   :group 'um
   )
 
-(defvar um-minor-mode-keywords
+(defvar um--minor-mode-keywords
   `(
-    (,um-date-re 1 'font-lock-um-date-face)
+    (,um--date-re 1 'font-lock-um-date-face)
     (,um-locale-re 0 'font-lock-um-locale-face)
-    (,um-tag-regexp 1 'font-lock-um-tag-face)
+    (,um--tag-regexp 1 'font-lock-um-tag-face)
     ))
 
 (defvar-keymap um-minor-mode-map
@@ -388,9 +388,9 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   :keymap um-minor-mode-map
   (if um-minor-mode
       (progn
-        (font-lock-add-keywords nil um-minor-mode-keywords)
+        (font-lock-add-keywords nil um--minor-mode-keywords)
         (font-lock-flush))
-    (font-lock-remove-keywords nil um-minor-mode-keywords)
+    (font-lock-remove-keywords nil um--minor-mode-keywords)
     (font-lock-flush))
   )
 
@@ -403,20 +403,20 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
 (defun um-previous-line ()
   (interactive) (move-beginning-of-line nil) (previous-line))
 
-(defun um-inhibit-read-only (cmd &optional args)
+(defun um--iro (cmd &optional args)
   (let ((inhibit-read-only t))
     (apply cmd args)))
 
-(defun um-drag-stuff-up () (interactive) (um-inhibit-read-only 'drag-stuff-up '(1)))
-(defun um-drag-stuff-down () (interactive) (um-inhibit-read-only 'drag-stuff-down '(1)))
-(defun um-kill-line () (interactive) (um-inhibit-read-only 'kill-line))
-(defun um-kill-region () (interactive) (um-inhibit-read-only 'kill-region '(nil nil t)))
+(defun um-drag-stuff-up () (interactive) (um--iro 'drag-stuff-up '(1)))
+(defun um-drag-stuff-down () (interactive) (um--iro 'drag-stuff-down '(1)))
+(defun um-kill-line () (interactive) (um--iro 'kill-line))
+(defun um-kill-region () (interactive) (um--iro 'kill-region '(nil nil t)))
 ;; NOTE: parallel to dired-copy-filename-as-kill
 (defun um-copy-line-as-kill () (interactive) (kill-ring-save (pos-bol) (pos-eol))
        (message (buffer-substring-no-properties (pos-bol) (pos-eol))))
-(defun um-yank () (interactive) (um-inhibit-read-only 'yank))
-(defun um-tag-dwim-inhibit-read-only (arg) (interactive "p")
-       (um-inhibit-read-only 'um-tag-dwim (list arg)))
+(defun um-yank () (interactive) (um--iro 'yank))
+(defun um-tag-dwim-iro (arg) (interactive "p")
+       (um--iro 'um-tag-dwim (list arg)))
 
 ;; NOTE: define-derived-mode defines a sparse keymap with the parent mode. But
 ;; we can prefill it:
@@ -431,7 +431,7 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   "C-w" 'um-kill-region
   "w" 'um-copy-line-as-kill
   "C-y" 'um-yank
-  "t" 'um-tag-dwim-inhibit-read-only
+  "t" 'um-tag-dwim-iro
   )
 
 ;;;###autoload
