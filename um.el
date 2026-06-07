@@ -39,6 +39,9 @@
 (require 'project)
 (require 'dired)
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; defcustom
+
 (defgroup um nil
   "(u)ltralight (m)arkdown zettelkasten."
   :link '(url-link :tag "Website" "https://github.com/brtholomy/um")
@@ -65,7 +68,7 @@
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; faces
+;;; faces
 
 ;; TODO: doesn't currently respect um-date-format:
 (defconst um-date-re (rx
@@ -138,8 +141,7 @@ ISO8601."
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; find-file-at-point
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; find-file-at-point
 
 (defun um-root-path ()
   (or (car (seq-filter
@@ -153,7 +155,7 @@ ISO8601."
       ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; `find-file' integration
+;;;; `find-file' integration
 ;;
 ;; combined with the hook into `file-name-at-point-functions', this means we can
 ;; run `find-file' at point, followed by `next-history-element'. By default:
@@ -186,7 +188,7 @@ ISO8601."
 (add-hook 'file-name-at-point-functions 'um-find-file-at-point)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; `embark-dwim' integration
+;;;; `embark-dwim' integration
 ;;
 ;; Load this with an advice:
 ;; (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
@@ -214,7 +216,7 @@ ISO8601."
    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; tags
+;;; tags
 
 ;; NOTE: this will get saved by savehist-mode
 (defvar um-tags-history nil "History of inserted or searched for tags. Populates
@@ -349,7 +351,7 @@ Negative prefix arg is handled by `um-tag-do', which see.
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CLI
+;;; CLI
 
 (defun um--header (filename &optional tags)
   "Create a header composed of:
@@ -383,7 +385,7 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   (message "um next: %s" filename))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; um-minor-mode : in markdown files under markdown-mode
+;;; um-minor-mode : under markdown-mode
 
 (defvar-keymap um-minor-mode-map
   :doc "Keymap for `um-minor-mode'."
@@ -408,7 +410,7 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; um-mode : in .um files
+;;; um-mode : .um files
 
 (defun um-next-line ()
   (interactive) (move-beginning-of-line nil) (next-line))
@@ -466,3 +468,8 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
   (read-only-mode))
 
 (provide 'um)
+
+;; Local Variables:
+;; outline-regexp: ";;;+ [^;]+"
+;; eval: (outline-minor-mode 1)
+;; End:
