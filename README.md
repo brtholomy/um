@@ -115,7 +115,7 @@ To create a new file:
 um next
 ```
 
-This will create the file, open it with emacsclient, and run `um-journal-header` in that file:
+This will create the file, open it with emacsclient, and run `um--header` in that file:
 
 ```markdown
 # 01.md
