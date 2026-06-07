@@ -510,6 +510,13 @@ A negative prefix argument moves it backward.
   "C-M-t" #'um-transpose-section
   )
 
+(bind-keys
+ :repeat-map um-section-repeat-map
+ :repeat-docstring "Keymap to repeat um key sequences
+ `um-backward-section' and `um-forward-section'."
+ ("p" . um-backward-section)
+ ("n" . um-forward-section))
+
 ;;;###autoload
 (define-minor-mode um-minor-mode
   "Minor mode for `um' commands.
