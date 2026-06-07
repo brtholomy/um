@@ -456,13 +456,14 @@ Optional TAGS string may contain more than one tag separated by a comma.
 \\{um-mode-map}
 "
   ;; restrict movement to (bolp) with cursor-intangible-mode
-  (save-excursion
-    (goto-char (point-min))
-    (while (not (eobp))
-      ;; NOTE: actually the newline is the only position not included, but this
-      ;; positions the cursor visually at the bol:
-      (put-text-property (pos-bol) (pos-eol) 'cursor-intangible t)
-      (forward-line 1)))
+  (let ((inhibit-read-only t))
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        ;; NOTE: actually the newline is the only position not included, but this
+        ;; positions the cursor visually at the bol:
+        (put-text-property (pos-bol) (pos-eol) 'cursor-intangible t)
+        (forward-line 1))))
   (cursor-intangible-mode)
   (read-only-mode))
 
