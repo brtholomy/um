@@ -67,24 +67,6 @@
   :group 'um
   )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; faces
-
-;; TODO: doesn't currently respect um-date-format:
-(defconst um-date-re (rx
-                      line-start
-                      (literal ": ")
-                      (group (repeat 4 digit)
-                             (literal um-date-separator)
-                             (repeat 1 2 digit)
-                             (literal um-date-separator)
-                             (repeat 1 2 digit))
-                      line-end
-                      )
-  "um date regexp. built from `um-date-separator'. NOTE: currently assumes
-ISO8601."
-  )
-
 ;; NOTE: regexp-opt wraps the whole expression in (), so I can't omit the -.
 (defcustom um-locale-re (regexp-opt '(
                                       "- home"
@@ -95,50 +77,6 @@ ISO8601."
   :type '(string)
   :group 'um
   )
-
-(defconst um-tag-regexp "^\\+ \\([[:alpha:]\\_\\-]+\\)$"
-  "um tag regexp. Allows hypens and underscores within the tag.")
-
-(defface font-lock-um-date-face
-  `((((type tty) (class mono)))
-    (t (
-        :inherit shadow
-        )))
-  "um date face"
-  :group 'um
-  )
-
-(defface font-lock-um-locale-face
-  `((((type tty) (class mono)))
-    (t (
-        :inherit shadow
-        )))
-  "um locale face"
-  :group 'um
-  )
-
-(defface font-lock-um-tag-face
-  `((((type tty) (class mono)))
-    (t (
-        :inherit shadow
-        )))
-  "um tag face"
-  :group 'um
-  )
-
-(font-lock-add-keywords 'markdown-mode
-                        `(
-                          (,um-date-re 1 'font-lock-um-date-face)
-                          (,um-locale-re 0 'font-lock-um-locale-face)
-                          (,um-tag-regexp 1 'font-lock-um-tag-face)
-                          ))
-
-(defvar um-minor-mode-keywords
-  `(
-    (,um-date-re 1 'font-lock-um-date-face)
-    (,um-locale-re 0 'font-lock-um-locale-face)
-    (,um-tag-regexp 1 'font-lock-um-tag-face)
-    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; find-file-at-point
@@ -386,6 +324,58 @@ A tag with a value of \"+\" is rendered as the descriptor portion of the filenam
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; um-minor-mode : under markdown-mode
+
+;; TODO: doesn't currently respect um-date-format:
+(defconst um-date-re (rx
+                      line-start
+                      (literal ": ")
+                      (group (repeat 4 digit)
+                             (literal um-date-separator)
+                             (repeat 1 2 digit)
+                             (literal um-date-separator)
+                             (repeat 1 2 digit))
+                      line-end
+                      )
+  "um date regexp. built from `um-date-separator'. NOTE: currently assumes
+ISO8601."
+  )
+
+(defconst um-tag-regexp "^\\+ \\([[:alpha:]\\_\\-]+\\)$"
+  "um tag regexp. Allows hypens and underscores within the tag.")
+
+(defface font-lock-um-date-face
+  `((((type tty) (class mono)))
+    (t (
+        :inherit shadow
+        )))
+  "um date face"
+  :group 'um
+  )
+
+(defface font-lock-um-locale-face
+  `((((type tty) (class mono)))
+    (t (
+        :inherit shadow
+        )))
+  "um locale face"
+  :group 'um
+  )
+
+(defface font-lock-um-tag-face
+  `((((type tty) (class mono)))
+    (t (
+        :inherit shadow
+        )))
+  "um tag face"
+  :group 'um
+  )
+
+(defvar um-minor-mode-keywords
+  `(
+    (,um-date-re 1 'font-lock-um-date-face)
+    (,um-locale-re 0 'font-lock-um-locale-face)
+    (,um-tag-regexp 1 'font-lock-um-tag-face)
+    ))
 
 (defvar-keymap um-minor-mode-map
   :doc "Keymap for `um-minor-mode'."
