@@ -9,6 +9,8 @@ import (
 type Set map[string]bool
 
 // add members to the "set"
+// TODO: this probably should have been a pointer receiver to handle the nil map case.
+// currently doing some roundabout checks before calling.
 func (s Set) Add(mems ...string) {
 	for _, m := range mems {
 		s[m] = true
