@@ -4,31 +4,32 @@
 ;; Version: 0.1
 
 ;; Um is an ultralight database design and emacs toolkit for organizing writing
-;; into larger compositions. It uses only unique filenames, POSIX filesystem
-;; conventions, the builtin `project' package, and standard POSIX commandline
-;; tools to build out the CLI.
-
-;; It consists of two parts:
-;; 1. The elisp for functionality within emacs.
-;; 2. Bash scripts for the commandline interface.
-
+;; into larger compositions. It consists of two parts:
+;;
+;; 1. Elisp for functionality within emacs.
+;; 2. Go for the commandline interface.
+;;
 ;; This is somewhat like org-roam, except without any database dependency. (And
 ;; it assumes Markdown rather than org, which I don't care for.)
-
+;;
 ;; This depends on a few simple ideas:
-
-;; 1. A numbered filename specification which serves as unique id.
-
-;; 2. Placing that same id into the file header, so that concatenated files
-;; have reference back to their source. See the `um cat` command.
-
-;; 3. Using a source `um-root-glob' directory, where source files should first be
-;; composed and where we can assume a file exists if not elsewhere.
-
-;; 4. Using the built-in `project' package to organize compositions built from
-;; these source files.
-
+;;
+;; 1. A numbered filename specification which serves as unique id. The
+;; filesystem is the database.
+;;
+;; 2. A file header consisting of the title, date, and optional tags. These tags
+;; can be used by the CLI to construct expressive queries.
+;;
+;; 3. Using a "root" project defined by `um-root-glob', where source files
+;; should first be composed and where we can assume a file exists if not
+;; elsewhere.
+;;
+;; 4. Using the built-in `project' package and the CLI to organize compositions
+;; built from these source files.
+;;
 ;; features provided:
+;; `um-mode': for *.um files, which are lists of content files produced by "um tag".
+;; `um-minor-mode': for *.md files, which are the content files.
 ;; `um-find-file-at-point' via `find-file': open a file under point in the
 ;; current project, falling back to a source directory.
 ;; `um-target-file-at-point-advice' via `embark-dwim': open file under point in all

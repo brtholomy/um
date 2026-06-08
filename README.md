@@ -28,7 +28,7 @@ This "database" depends on a few simple ideas:
     digits.[descriptor.]md
     ```
 
-2. A very simple file header consisting of the title and date, with optional tags and place marker.
+2. A file header consisting of the title, date, and optional tags. These tags can be used by the CLI to construct expressive queries.
 
     ```markdown
     # 001.foo.md
@@ -39,7 +39,7 @@ This "database" depends on a few simple ideas:
 
 3. Using a "root" project defined by `um-root-glob`, where source files should first be composed and where we can assume a file exists if not elsewhere. This matters when trying to navigate back to a source file.
 
-4. Using the built-in emacs `project` package and a powerful CLI to organize compositions built from these source files.
+4. Using the built-in emacs `project` package and the CLI to organize compositions built from these source files.
 
 # installation
 
@@ -62,7 +62,35 @@ Install with use-package:
 )
 ```
 
-Note the optional setup of `embark`, which allows us to find files intelligently, explained below.
+## um-mode
+
+This:
+
+```
+  :mode ("\\.um\\'" . um-mode)
+```
+
+Enables `um-mode` for `*.um` files, which are treated as lists of Markdown content files.
+
+## um-minor-mode
+
+This:
+
+```
+  :hook (markdown-mode-hook . um-minor-mode)
+```
+
+Hooks `um-minor-mode` into `markdown-mode` to get `um-minor-mode-map` bindings and font locking for the header fields.
+
+## embark-dwim
+
+This:
+
+```
+  :config (advice-add 'embark-target-file-at-point :around 'um-target-file-at-point-advice)
+```
+
+Sets up `embark-dwim` to find files intelligently, explained below.
 
 ## CLI binary
 
@@ -81,12 +109,13 @@ ln -s ~/.emacs.d/elpa/um/go/um /usr/local/bin/um
 
 # ultralight "database"
 
-What I consider the killer feature of `um` is the ability to jump to files from filenames listed in any "child" project back to the "source" project, defined via `um-root-glob`. This means that child projects can be initially defined as simple lists of filenames, which I do to compose larger pieces. A simple filename anywhere can also serve as a "link".
+What I consider the killer feature of `um` is the ability to jump to files from filenames listed in any "child" project back to the "source" project, defined via `um-root-glob`. This means that child projects can be initially defined as simple lists of `*.um` filenames, which I do to compose larger pieces. A simple filename anywhere can also serve as a "link".
 
-There are two primary ways this is accessed:
+There are a few ways this is accessed:
 
-1. `find-file` and `next-history-element`, which will work as `C-x C-f M-n` out of the box. See `um-find-file-at-point`.
-2. By invoking `emark-dwim` on any filename. Requires `embark` and the `advice-add` shown above.
+1. `um-find-file-at-point` is hooked into `find-file` by default via `next-history-element`, which will work as `C-x C-f M-n` out of the box.
+
+2. `um-target-file-at-point-advice` via `emark-dwim` on any filename. Requires `embark` and the `advice-add` shown above.
 
 # CLI
 
@@ -227,8 +256,10 @@ This is the most powerful aspect of `um`: a simple list of tags applied to sourc
 We can then search for files containing these tags. This list just goes to stdout, so the idea is to pipe it into a file for reordering within emacs:
 
 ```sh
-um tag foo > ./some/filelist.md
+um tag foo > some/filelist.um
 ```
+
+### set logic
 
 The query supports union as `+` and intersection as `,`:
 
@@ -264,7 +295,7 @@ Run `um tag --help` to see what it can do.
 When working with the filelists produced by `um tag`, we'll want to rearrange the order of files and add or remove tags. Then when we update our filelist by rerunning `um tag`, we want the output to respect our updated order. `um sort` does this:
 
 ```sh
-um tag foo+bar | um sort --key some/filelist.md
+um tag foo+bar | um sort --key some/filelist.um
 ```
 
 ## um cat
@@ -278,7 +309,7 @@ um tag foo | um cat
 As the last step in composing larger pieces, it accepts a filelist and a base directory to find those files. We can then pipe the output wherever we like:
 
 ```sh
-um cat filelist.md --base ../ > finished.md
+um cat filelist.um --base ../ > finished.md
 ```
 
 And there you have the virtue of the Unix philosophy.
