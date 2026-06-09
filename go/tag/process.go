@@ -48,17 +48,17 @@ func processQueries(tagmap map[string]Set, query Query) Set {
 		set = Set{}
 	}
 
-	// empty query
+	// single tag: no need for set logic whether the empty query or not
 	// TODO: do I want to handle WILD and a tag? Actual regex?
-	if len(query.Tags) == 1 && query.Op == WILD && q == "" {
-		// NOTE: this is all files with at least one tag and therefore of value:
-		set.Union(slices.Collect(maps.Values(tagmap))...)
-		return set
-	}
-	// non-empty query of single tag: no need for set logic:
 	if len(query.Tags) == 1 {
+		if query.Op == WILD && q == "" {
+			// NOTE: this is all files with at least one tag and therefore of value:
+			set.Union(slices.Collect(maps.Values(tagmap))...)
+		}
+		// non-empty query should return also:
 		return set
 	}
+
 	for _, t := range query.Tags {
 		switch query.Op {
 		case OR:
