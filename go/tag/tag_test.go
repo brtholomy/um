@@ -89,6 +89,15 @@ func TestBadTag(t *testing.T) {
 	assert.False(t, ok)
 }
 
+func TestBadTagOr(t *testing.T) {
+	entries := entriesGlobOrStdin(TEST_PATTERN)
+	tagmap := makeTagmap(entries)
+	queries := parseQuery("flob,bar")
+	fs := processQueries(tagmap, queries)
+	expected := Set{"01.foo.md": true, "02.foo.md": true, "03.bar.md": true}
+	assert.Equal(t, expected, fs)
+}
+
 // Since entriesGlobOrStdin() involves filesystem reads, we test the underlying logic.
 func BenchmarkParseContent(b *testing.B) {
 	e := entriesGlobOrStdin(TEST_PATTERN)[0]

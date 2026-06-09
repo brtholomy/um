@@ -34,7 +34,7 @@ func dateRange(entries []Entry, date string) []Entry {
 func processQueries(tagmap map[string]Set, query Query) Set {
 	set := Set{}
 	// sanity check:
-	if len(query.Tags) < 1 {
+	if len(query.Tags) == 0 {
 		return set
 	}
 
@@ -42,6 +42,11 @@ func processQueries(tagmap map[string]Set, query Query) Set {
 	q := query.Tags[0]
 	// NOTE: clone so that we don't accidentally overwrite the incoming tagmap
 	set = maps.Clone(tagmap[q])
+	// if first query matches nothing: set will be nil and Union will fail:
+	// TODO: solve this in set.Union by moving to pointer receiver.
+	if set == nil {
+		set = Set{}
+	}
 
 	// empty query
 	// TODO: do I want to handle WILD and a tag? Actual regex?
@@ -50,32 +55,16 @@ func processQueries(tagmap map[string]Set, query Query) Set {
 		set.Union(slices.Collect(maps.Values(tagmap))...)
 		return set
 	}
-	// no need for set logic in this case:
+	// non-empty query of single tag: no need for set logic:
 	if len(query.Tags) == 1 {
 		return set
 	}
-	// if first query matches nothing: set will be nil and Union will fail:
-	// TODO: solve this in set.Union by moving to pointer receiver.
-	if set == nil {
-		for _, t := range query.Tags {
-			if tagmap[t] != nil {
-				set = tagmap[t]
-				break
-			}
-		}
-	}
-	// all tagmap[q] are still nil:
-	if set == nil {
-		return set
-	}
-
-	for i := 0; i < len(query.Tags); i++ {
-		q = query.Tags[i]
+	for _, t := range query.Tags {
 		switch query.Op {
 		case OR:
-			set.Union(tagmap[q])
+			set.Union(tagmap[t])
 		case AND:
-			set.Intersect(tagmap[q])
+			set.Intersect(tagmap[t])
 		}
 	}
 	return set
