@@ -136,6 +136,21 @@
 ;; NOTE: we now load this by default if the package is loaded.
 (add-hook 'file-name-at-point-functions 'um-find-file-at-point)
 
+(defun um--filelist-dwim ()
+  "Return a list of filenames obtained from marks in dired, from the active
+  region, or from the file at point, or the current file."
+  (let (
+        (marks (if (eq major-mode 'dired-mode) (dired-get-marked-files) nil))
+        (fap (um-find-file-at-point))
+        )
+    (cond
+     ((and (region-active-p) (not (eq major-mode 'dired-mode)))
+      (string-split (buffer-substring-no-properties (region-beginning) (region-end))))
+     (marks marks)
+     (fap (list fap))
+     (t (list (buffer-file-name)))
+     )))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; `embark-dwim' integration
 ;;
@@ -270,16 +285,7 @@ Negative prefix arg is handled by `um--tag-do', which see.
   (let* (
          (insert (> ARG 0))
          (prompt (format "um tag %s: " (if insert "insert" "delete")))
-         (marks (if (eq major-mode 'dired-mode) (dired-get-marked-files) nil))
-         ;; NOTE: should avoid bogus strings when in a markdown buffer:
-         (fap (um-find-file-at-point))
-         (files (cond
-                 ((and (region-active-p) (not (eq major-mode 'dired-mode)))
-                  (string-split (buffer-substring (region-beginning) (region-end))))
-                 (marks marks)
-                 (fap (list fap))
-                 (t (list (buffer-file-name)))
-                 ))
+         (files (um--filelist-dwim))
          (collection (if insert um-tags-history (um--extract-tags files)))
          ;; no need for dupes:
          (history-delete-duplicates t)
@@ -298,6 +304,20 @@ Negative prefix arg is handled by `um--tag-do', which see.
         (um--tag-do tag ARG)
         (save-buffer)))
     ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; ispell
+
+(defun um-do-ispell ()
+  "Run `ispell-buffer' on a list of files."
+  (interactive)
+  (dolist (f (um--filelist-dwim))
+    (save-window-excursion
+      (with-current-buffer
+          ;; NOTE: not find-file-noselect because ispell needs to display the window:
+          (find-file (expand-file-name f (um--root-path)) t)
+        (ispell-buffer)
+        ))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; CLI
