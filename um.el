@@ -198,6 +198,7 @@
 
 (defun um--tag-first-in-buffer ()
   (save-excursion
+    (goto-char (point-min))
     (when (search-forward um--tag-regexp (um--header-end-pos) t)
       (match-string 1))))
 
