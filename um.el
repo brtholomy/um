@@ -584,8 +584,8 @@ A negative prefix argument moves it backward.
     (um--set-cursor-intangible-property)))
 
 (defun um-drag-stuff-up () (interactive) (um--iro 'drag-stuff-up '(1)))
-;; TODO: drag-stuff-down is breaking um--set-cursor-intangible-property
-(defun um-drag-stuff-down () (interactive) (um--iro 'drag-stuff-down '(1)))
+;; HACK: drag-stuff-down breaks um--set-cursor-intangible-property for some reason. just use drag-stuff-up with negative arg:
+(defun um-drag-stuff-down () (interactive) (um--iro 'drag-stuff-up '(-1)))
 (defun um-kill-line () (interactive) (um--iro 'kill-line))
 (defun um-kill-region () (interactive) (um--iro 'kill-region '(nil nil t)))
 ;; NOTE: parallel to dired-copy-filename-as-kill
