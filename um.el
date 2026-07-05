@@ -563,11 +563,28 @@ A negative prefix argument moves it backward.
 (defun um-previous-line ()
   (interactive) (move-beginning-of-line nil) (previous-line))
 
+(defun um--set-cursor-intangible-property ()
+  (let ((modified (buffer-modified-p)))
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+        ;; NOTE: reset all properties as side-effect. But this is what we want.
+        ;; NOTE: actually the newline is the only position not included, but this
+        ;; positions the cursor visually at the bol:
+        (set-text-properties (pos-bol) (pos-eol) '(cursor-intangible t))
+        (forward-line 1)))
+    ;; we don't want to fuck with the modified state just to change text
+    ;; properties, but we also don't want to obscure it if it was already modified.
+    (set-buffer-modified-p modified)))
+
 (defun um--iro (cmd &optional args)
   (let ((inhibit-read-only t))
-    (apply cmd args)))
+    (apply cmd args)
+    ;; NOTE: every modification of buffer needs to reset the props:
+    (um--set-cursor-intangible-property)))
 
 (defun um-drag-stuff-up () (interactive) (um--iro 'drag-stuff-up '(1)))
+;; TODO: drag-stuff-down is breaking um--set-cursor-intangible-property
 (defun um-drag-stuff-down () (interactive) (um--iro 'drag-stuff-down '(1)))
 (defun um-kill-line () (interactive) (um--iro 'kill-line))
 (defun um-kill-region () (interactive) (um--iro 'kill-region '(nil nil t)))
@@ -600,15 +617,8 @@ A negative prefix argument moves it backward.
 
 \\{um-mode-map}
 "
-  ;; restrict movement to (bolp) with cursor-intangible-mode
   (let ((inhibit-read-only t))
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-        ;; NOTE: actually the newline is the only position not included, but this
-        ;; positions the cursor visually at the bol:
-        (put-text-property (pos-bol) (pos-eol) 'cursor-intangible t)
-        (forward-line 1))))
+    (um--set-cursor-intangible-property))
   (cursor-intangible-mode)
   (read-only-mode))
 
