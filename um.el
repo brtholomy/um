@@ -566,7 +566,11 @@ A negative prefix argument moves it backward.
 (defun um--reset-cursor-intangible-property ()
   (let ((modified (buffer-modified-p)))
     ;; NOTE: remove all first, because otherwise we might miss a newline:
-    (remove-text-properties (point-min) (point-max) '(cursor-intangible t))
+    (remove-text-properties (point-min) (point-max)
+                            '(
+                              cursor-intangible t
+                              ;; NOTE: no faces in yanked text:
+                              face nil))
     (save-excursion
       (goto-char (point-min))
       (while (not (eobp))
