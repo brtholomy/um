@@ -78,7 +78,8 @@ func cat(files []string, opts options) (string, error) {
 		s := decapitate(string(dat), opts)
 		ff = append(ff, s)
 	}
-	return strings.Join(ff, HR_BLOCK), nil
+	// NOTE: prepend leading HR_BLOCK, since these are used for section numbering in both online and print format:
+	return HR_BLOCK + strings.Join(ff, HR_BLOCK), nil
 }
 
 func Cat(args []string) {
