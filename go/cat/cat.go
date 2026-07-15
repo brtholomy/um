@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/brtholomy/um/go/cmd"
@@ -17,16 +18,23 @@ const (
 	CMD            = cmd.Cat
 	SUMMARY        = "cat um files together using a filelist. removes header by default"
 	HR_BLOCK       = "\n---\n\n"
+	HR_BLOCK_STRIP = "---\n\n"
 	DOUBLE_NEWLINE = "\n\n"
 	H1             = "# "
 )
 
+// NOTE: would prefer to reuse next.FILE_REGEXP, but I don't want a capture group and this is clearer:
+const FILE_LINK_REGEXP = `(?m)` + HR_BLOCK_STRIP + `[0-9]+\.[^\.]*\.*md` + DOUBLE_NEWLINE
+
+var fileLinkRegexp *regexp.Regexp = regexp.MustCompile(FILE_LINK_REGEXP)
+
 type options struct {
-	Filelist   flags.Arg
-	Base       flags.String
-	KeepHeader flags.Bool
-	KeepTitle  flags.Bool
-	Help       flags.Bool
+	Filelist       flags.Arg
+	Base           flags.String
+	KeepHeader     flags.Bool
+	KeepTitle      flags.Bool
+	StripFileLinks flags.Bool
+	Help           flags.Bool
 }
 
 func initOpts() options {
@@ -35,6 +43,7 @@ func initOpts() options {
 		flags.String{"--base", "-b", "", "base directory prepended to files in filelist"},
 		flags.Bool{"--keep-header", "-d", false, "preserve um headers in concatenated file. overrides --keep-title"},
 		flags.Bool{"--keep-title", "-t", false, "preserve um titles in concatenated file"},
+		flags.Bool{"--strip-file-links", "-s", false, "strip file links in concatenated file"},
 		flags.Bool{"--help", "-h", false, "show help"},
 	}
 }
@@ -67,6 +76,19 @@ func decapitate(s string, opts options) string {
 	return s
 }
 
+// strips out file links, which are simply a single filename between hr section blocks:
+// ---
+//
+// 100.foo.md
+//
+// NOTE: only matches the signature of a single filename.
+func stripFileLinks(s string, opts options) string {
+	if !opts.StripFileLinks.IsSet() {
+		return s
+	}
+	return fileLinkRegexp.ReplaceAllString(s, "")
+}
+
 func cat(files []string, opts options) (string, error) {
 	ff := make([]string, 0, len(files))
 	for _, f := range files {
@@ -79,7 +101,11 @@ func cat(files []string, opts options) (string, error) {
 		ff = append(ff, s)
 	}
 	// NOTE: prepend leading HR_BLOCK, since these are used for section numbering in both online and print format:
-	return HR_BLOCK + strings.Join(ff, HR_BLOCK), nil
+	catted := HR_BLOCK + strings.Join(ff, HR_BLOCK)
+	// NOTE: strip here, because only the fully catted string will match the file link signature,
+	// since such links can occur at the beginning of a file with no leading hr.
+	catted = stripFileLinks(catted, opts)
+	return catted, nil
 }
 
 func Cat(args []string) {
