@@ -23,8 +23,9 @@ const (
 	H1             = "# "
 )
 
-// NOTE: would prefer to reuse next.FILE_REGEXP, but I don't want a capture group and this is clearer:
-const FILE_LINK_REGEXP = `(?m)` + HR_BLOCK_STRIP + `[0-9]+\.[^\.]*\.*md` + DOUBLE_NEWLINE
+// NOTE: would prefer to reuse next.FILE_REGEXP, but this is clearer:
+// NOTE: supports multiple filenames with a single newline between:
+const FILE_LINK_REGEXP = `(?m)` + HR_BLOCK_STRIP + `([0-9]+\.[^\.]*\.*md\n)+\n`
 
 var fileLinkRegexp *regexp.Regexp = regexp.MustCompile(FILE_LINK_REGEXP)
 
@@ -76,12 +77,13 @@ func decapitate(s string, opts options) string {
 	return s
 }
 
-// strips out file links, which are simply a single filename between hr section blocks:
+// strips out file links, which are simply a filename per line, between hr section blocks:
 // ---
 //
 // 100.foo.md
+// 200.bar.md
 //
-// NOTE: only matches the signature of a single filename.
+// NOTE: lists must contain a single newline as separator.
 func stripFileLinks(s string, opts options) string {
 	if !opts.StripFileLinks.IsSet() {
 		return s
