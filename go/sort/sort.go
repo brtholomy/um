@@ -19,15 +19,15 @@ const (
 )
 
 type options struct {
-	Source flags.String
-	Key    flags.String
-	Write  flags.Bool
-	Help   flags.Bool
+	Filelist flags.Glob
+	Key      flags.String
+	Write    flags.Bool
+	Help     flags.Bool
 }
 
 func initOpts() options {
 	return options{
-		flags.String{"--source", "-s", "", "path to source list. reads from stdin if omitted."},
+		flags.Glob{nil, ".md filelist. accepts multiple. reads from stdin if not provided"},
 		flags.String{"--key", "-k", "", "path to sort key"},
 		flags.Bool{"--write", "-w", false, "write sorted list back to --key file"},
 		flags.Bool{"--help", "-h", false, "show help"},
@@ -84,7 +84,8 @@ func Sort(args []string) {
 		return
 	}
 
-	sslice, err := pipe.FileListSplitMaybeStdin(opts.Source.Val)
+	// NOTE: um sort expects a list of .md files, in contrast to um cat.
+	sslice, err := pipe.GlobOrStdin(opts.Filelist.Val)
 	if err != nil {
 		log.Fatalf("um %s: %s", CMD, err)
 	}

@@ -29,15 +29,30 @@ func GetStdin() ([]string, error) {
 	return strings.Split(s, Newline), nil
 }
 
-// reads files from stdin if present, otherwise from the filename:
-func FileListSplitMaybeStdin(f string) ([]string, error) {
+// reads files from stdin if present, otherwise just returns the glob:
+func GlobOrStdin(glob []string) ([]string, error) {
 	filelist, err := GetStdin()
 	if err != nil {
-		// BORK: don't see a neater way of wrapping these two when we depend on the non-nil in this block:
-		// if i just return FileListSplit(), we lose the first err
-		filelist, err2 := FileListSplit(f)
-		if err2 != nil {
-			return nil, fmt.Errorf("%w: %w", err, err2)
+		if glob == nil || len(glob) == 0 {
+			return nil, fmt.Errorf("glob is empty")
+		}
+		return glob, nil
+	}
+	return filelist, nil
+}
+
+// reads files from stdin if present, otherwise reads content from files in glob and assembles into a list.
+func FileListFromGlobOrStdin(glob []string) ([]string, error) {
+	filelist, err := GetStdin()
+	if err != nil {
+		for _, f := range glob {
+			// TODO: don't see a neater way of wrapping these two when we depend on the non-nil in this block:
+			// if i just return FileListSplit(), we lose the first err
+			fl, err2 := FileListSplit(f)
+			if err2 != nil {
+				return nil, fmt.Errorf("%w: %w", err, err2)
+			}
+			filelist = append(filelist, fl...)
 		}
 		return filelist, nil
 	}

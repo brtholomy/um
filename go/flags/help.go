@@ -61,9 +61,12 @@ func (h HelpError) Help(opts any) error {
 		tField := t.Field(i)
 		vField := v.Field(i)
 		switch vField.Interface().(type) {
-		case Arg:
+		case Arg, Glob:
 			positional += fmt.Sprintf(" [%s]", strings.ToLower(tField.Name))
-			fmt.Fprintf(w, "[%v]\tstring\t%v\n", strings.ToLower(tField.Name), vField.FieldByName("Help"))
+			fmt.Fprintf(w, "[%v]\t%v\t%v\n",
+				strings.ToLower(tField.Name),
+				vField.FieldByName("Val").Type(),
+				vField.FieldByName("Help"))
 		case String, Bool:
 			if tField.Name != "Help" {
 				positional += fmt.Sprintf(" [%s]", vField.FieldByName("Long"))
@@ -75,7 +78,7 @@ func (h HelpError) Help(opts any) error {
 				vField.FieldByName("Help"),
 			)
 		default:
-			return ParseError{fmt.Sprintf("needs a []Flag interface: %#v", vField.Type())}
+			return ParseError{fmt.Sprintf("Help did not recognize the Flag: %v", vField.Type())}
 
 		}
 	}

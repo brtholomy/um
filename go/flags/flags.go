@@ -31,6 +31,11 @@ type Arg struct {
 	Help string
 }
 
+type Glob struct {
+	Val  []string
+	Help string
+}
+
 type String struct {
 	Long  string
 	Short string
@@ -66,6 +71,33 @@ func (f *Arg) IsHelp() bool {
 }
 
 func (f *Arg) MaybeIncrement(i int) int {
+	return i
+}
+
+func (f *Glob) Set(arg string) {
+	f.Val = append(f.Val, arg)
+}
+
+func (f *Glob) Valid(args []string, i int) bool {
+	return true
+}
+
+func (f *Glob) Match(arg string, i, j int) bool {
+	// NOTE: this is the key difference from Arg: by not requiring that the arg and flag positions
+	// match, a shell-expanded glob of files of any length will populate the value.
+	return i >= j && !hasDashPrefix(arg)
+}
+
+func (f *Glob) IsSet() bool {
+	return f.Val != nil && len(f.Val) != 0
+}
+
+func (f *Glob) IsHelp() bool {
+	return false
+}
+
+func (f *Glob) MaybeIncrement(i int) int {
+	// NOTE: because this is only needed where a flag --prefix exists:
 	return i
 }
 
@@ -145,16 +177,16 @@ func expandOpts(opts any) ([]Flag, error) {
 	for j := 0; j < v.NumField(); j++ {
 		field := v.Field(j)
 		if field.Kind() != reflect.Struct {
-			return nil, ParseError{fmt.Sprintf("field must be a struct: %#v", field.Kind())}
+			return nil, ParseError{fmt.Sprintf("field must be a struct: %v", field.Kind())}
 		}
 		if !field.CanAddr() {
-			return nil, ParseError{fmt.Sprintf("field must be addressable type: %#v", field.Type())}
+			return nil, ParseError{fmt.Sprintf("field must be addressable type: %v", field.Type())}
 		}
 		// NOTE: Addr() gets the underlying address:
 		if f, ok := field.Addr().Interface().(Flag); ok {
 			flags = append(flags, f)
 		} else {
-			return nil, ParseError{fmt.Sprintf("field must be a []Flag interface: %#v", field.Type())}
+			return nil, ParseError{fmt.Sprintf("field must be a []Flag interface: %v", field.Type())}
 		}
 	}
 	return flags, nil

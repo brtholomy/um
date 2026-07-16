@@ -30,7 +30,7 @@ const FILE_LINK_REGEXP = `(?m)` + HR_BLOCK_STRIP + `([0-9]+\.[^\.]*\.*md\n)+\n`
 var fileLinkRegexp *regexp.Regexp = regexp.MustCompile(FILE_LINK_REGEXP)
 
 type options struct {
-	Filelist       flags.Arg
+	Filelist       flags.Glob
 	Base           flags.String
 	KeepHeader     flags.Bool
 	KeepTitle      flags.Bool
@@ -40,7 +40,7 @@ type options struct {
 
 func initOpts() options {
 	return options{
-		flags.Arg{"", "filelist. accepts from stdin if not provided"},
+		flags.Glob{nil, ".um filelist. accepts multiple. reads from stdin if not provided"},
 		flags.String{"--base", "-b", "", "base directory prepended to files in filelist"},
 		flags.Bool{"--keep-header", "-d", false, "preserve um headers in concatenated file. overrides --keep-title"},
 		flags.Bool{"--keep-title", "-t", false, "preserve um titles in concatenated file"},
@@ -120,7 +120,8 @@ func Cat(args []string) {
 		}
 		log.Fatalf("um %s: %s", CMD, err)
 	}
-	files, err := pipe.FileListSplitMaybeStdin(opts.Filelist.Val)
+	// NOTE: um cat expects .um files, the content of which is assembled:
+	files, err := pipe.FileListFromGlobOrStdin(opts.Filelist.Val)
 	if err != nil {
 		log.Fatalf("um %s: %s", CMD, err)
 	}
