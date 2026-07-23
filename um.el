@@ -34,11 +34,13 @@
 ;; current project, falling back to a source directory.
 ;; `um-target-file-at-point-advice' via `embark-dwim': open file under point in all
 ;; known projects, falling back to a source directory.
-;; `um-tag-grep': search files with some tag
+;; `um-tag-xref': find files with some tag
 ;; `um-tag-dwim': insert or delete a tag in dired and other contexts.
+;; `um-grep': grep limited to a filelist obtained dynamically.
 
 (require 'project)
 (require 'dired)
+(require 'grep)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; defcustom
@@ -203,7 +205,7 @@
       (match-string 1))))
 
 ;;;###autoload
-(defun um-tag-grep ()
+(defun um-tag-xref ()
   "Run `project-find-regexp' on a selection made from `um-tags-history' via
   `completing-read'.
 
@@ -219,7 +221,7 @@ Ultimately this relies on `xref-matches-in-files', which calls
 "
   (interactive)
   (project-find-regexp (concat "^\\+ "
-                               (completing-read "um tag: " um-tags-history nil
+                               (completing-read "um-tag-xref: " um-tags-history nil
                                                 nil nil
                                                 ;; NOTE: this means searches
                                                 ;; will add to the history:
@@ -304,6 +306,31 @@ Negative prefix arg is handled by `um--tag-do', which see.
           (find-file-noselect (expand-file-name f (um--root-path)) t)
         (um--tag-do tag ARG)
         (save-buffer)))
+    ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; grep
+
+(defvar um-grep-history nil)
+
+(defun um-grep (ARG)
+  "Run `grep' restricted to the files provided by `um--filelist-dwim' and
+relative to `um--root-path'.
+
+Prefix arg prompts for the directory instead.
+"
+  (interactive "P")
+  (grep-compute-defaults)
+  (when-let* (
+              (default-directory (if ARG (read-string "directory: ") (um--root-path)))
+              (query (shell-quote-argument (read-string "um-grep: " nil 'um-grep-history)))
+              ;; resolve to relative paths to keep the grep buffer sane:
+              (files (mapcar (lambda (f) (file-relative-name (expand-file-name f) default-directory))
+                             (um--filelist-dwim)))
+              (file-string (string-join files " "))
+              (cmd (concat grep-command query " " file-string))
+              )
+    (grep cmd)
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -520,7 +547,7 @@ A negative prefix argument moves it backward.
 
 (defvar-keymap um-minor-mode-map
   :doc "Keymap for `um-minor-mode'."
-  "M-s t" #'um-tag-grep
+  "M-s t" #'um-tag-xref
   ;; M-r is not exactly right, but can't think of a better binding:
   "M-r t" #'um-tag-dwim
   ;; TODO: find a better default binding?
@@ -612,6 +639,8 @@ A negative prefix argument moves it backward.
   "w" 'um-copy-line-as-kill
   "C-y" 'um-yank
   "t" 'um-tag-dwim-iro
+  ;; g is sidebar-revert-resize to parallel dired:
+  "M-s g" #'um-grep
   )
 
 ;;;###autoload
