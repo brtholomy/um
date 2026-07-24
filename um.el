@@ -622,8 +622,6 @@ A negative prefix argument moves it backward.
 (defun um-copy-line-as-kill () (interactive) (kill-ring-save (pos-bol) (pos-eol))
        (message (buffer-substring-no-properties (pos-bol) (pos-eol))))
 (defun um-yank () (interactive) (um--iro 'yank))
-(defun um-tag-dwim-iro (arg) (interactive "p")
-       (um--iro 'um-tag-dwim (list arg)))
 
 ;; NOTE: define-derived-mode defines a sparse keymap with the parent mode. But
 ;; we can prefill it:
@@ -638,7 +636,7 @@ A negative prefix argument moves it backward.
   "C-w" 'um-kill-region
   "w" 'um-copy-line-as-kill
   "C-y" 'um-yank
-  "t" 'um-tag-dwim-iro
+  "t" 'um-tag-dwim
   ;; g is sidebar-revert-resize to parallel dired:
   "M-s g" #'um-grep
   )
